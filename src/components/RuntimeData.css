@@ -75,14 +75,19 @@
 .rtd-details-group h4 {
 	font-size: 11px;
 	color: #666;
-	text-transform: uppercase;
 	letter-spacing: 1.5px;
 	margin-bottom: 10px;
 	margin-top: 8px;
 }
-.rtd-details-group .rtd-last-group {
-	margin-bottom: 0;
+
+.rtd-fw-info {
+	font-size: 12px;
+	color: #090;
+	letter-spacing: 1.3px;
+	margin-bottom: 0px;
+	margin-top: 8px;
 }
+
 .analog-grid {
 	display: flex;
 	gap: 10px;

@@ -1,76 +1,219 @@
-.fw-update-container {
-	display: flex;
-	flex-direction: column;
-	gap: 20px;
-	padding: 10px;
+/* --- FirmwareUpdate.css --- */
+
+.fw-update-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.fw-upload-zone {
-	display: flex;
-	gap: 10px;
-	align-items: center;
+/* File selection styling */
+.fw-file-row {
+    display: flex;
+    width: 100%;
 }
 
-#fw-file { display: none; }
-
-.fw-select-btn {
-	background: #333;
-	padding: 10px 20px;
-	border: 1px solid #555;
-	border-radius: 4px;
-	cursor: pointer;
-	flex: 1;
-	text-align: center;
+.fw-path-display {
+    flex: 1;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 4px 0 0 4px;
+    padding: 8px 12px;
+    color: #00ff00;
+    font-family: monospace;
+    font-size: 13px;
+    outline: none;
 }
 
-.fw-start-btn {
-	background: #008800;
-	color: white;
-	border: none;
-	padding: 10px 25px;
-	border-radius: 4px;
+.fw-browse-btn {
+    background: #333;
+    color: white;
+    border: 1px solid #444;
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+    padding: 0 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+.fw-browse-btn:hover {
+    background: #444;
+}
+
+/* Main Grid Layout: Table (4/5) and Controls (1/5) */
+.fw-main-grid {
+    display: grid;
+    grid-template-columns: 4fr 1fr;
+    gap: 15px;
+    min-height: 450px;
+}
+
+/* Data Table Container */
+.fw-table-section {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 4px;
+}
+
+/* Right Sidebar Styling */
+.fw-control-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 12px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 4px;
+}
+
+.fw-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fw-cmd-btn, .fw-start-btn {
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #444;
+    background: #222;
+    color: #ccc;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+}
+
+.fw-cmd-btn:hover {
+    background: #333;
+    color: #fff;
+}
+
+.fw-start-btn.primary {
+    background: #004400;
+    border-color: #008800;
+    color: #00ff00;
+    margin-top: 12px;
+    padding: 15px 5px;
+    font-size: 15px;
+}
+
+.fw-start-btn.primary:hover {
+    background: #006600;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+}
+
+/* Indicators and BL Info Block */
+.fw-indicators {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 5px;
+    padding-top: 15px;
+    border-top: 1px solid #333;
+}
+
+.indicator-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    color: #888;
+}
+
+.ind-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #222;
+    border: 1px solid #333;
+}
+
+/* Status Dot Colors */
+.dot-on-green { background: #00ff00; box-shadow: 0 0 8px rgba(0, 255, 0, 0.4); }
+.dot-on-blue { background: #0088ff; box-shadow: 0 0 8px rgba(0, 136, 255, 0.4); }
+.dot-on-red { background: #ff0000; box-shadow: 0 0 8px rgba(255, 0, 0, 0.4); }
+.dot-off { background: #111; }
+
+/* Bootloader Info Terminal Style */
+.bl-info-block {
+    margin-top: 10px;
+    padding: 10px;
+    background: #000;
+    border: 1px solid #222;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bl-info-item {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 15px;
+}
+
+.bl-info-item label {
+    color: #666;
+}
+
+.bl-info-item span {
+    color: #11aaff;
 	font-weight: bold;
-	cursor: pointer;
 }
 
-.fw-start-btn:disabled { background: #222; color: #555; cursor: not-allowed; }
-
-.fw-progress-bar {
-	background: #111;
-	height: 12px;
-	border-radius: 6px;
-	overflow: hidden;
-	border: 1px solid #333;
-	margin-top: 5px;
+.fw-footer-status {
+    font-size: 10px;
+    color: #444;
+    text-transform: uppercase;
 }
 
-.fw-progress-fill {
-	background: linear-gradient(90deg, #004400, #00ff00);
-	height: 100%;
-	transition: width 0.2s;
+.status-text-ready { color: #00ff00; }
+
+/* --- Comparison Table Styling --- */
+.fw-comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: #0a0a0a;
 }
 
-.fw-debug-log {
-	background: #050505;
-	border: 1px solid #222;
-	border-radius: 4px;
-	height: 200px;
-	display: flex;
-	flex-direction: column;
+.fw-comparison-table th {
+    background: #1a1a1a;
+    color: #888;
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid #333;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.log-header {
-	background: #111;
-	padding: 5px 10px;
-	font-size: 11px;
-	color: #666;
-	border-bottom: 1px solid #222;
+.fw-comparison-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #222;
+    color: #ccc;
 }
 
-.log-content {
-	padding: 10px;
-	font-family: monospace;
-	font-size: 12px;
-	color: #00cc00;
-	overflow-y: auto;
+.fw-comparison-table tr:hover {
+    background: #111;
+}
+
+/* Highlight columns */
+.val-file {
+    color: #00ff00; /* Green for new file data */
+    font-family: monospace;
+}
+
+.val-device {
+    color: #0088ff; /* Blue for current device data */
+    font-family: monospace;
+}
+
+.fw-comparison-table td:first-child {
+    color: #777;
+    font-weight: bold;
+    width: 30%;
 }

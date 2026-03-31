@@ -169,14 +169,8 @@ function RuntimeData({ data, pinf }) {
 				</div>
 			</div>
 			<div className="rtd-separator"></div>
-			<div className="rtd-details-group rtd-last-group">
-				<h4>System Config</h4>
-				<div className="settings-row">
-					<div className='settings-lab'>FW:</div><div className="setting-tag">F{pinf.fw.toString().padStart(3, '0')}</div>
-					<div className='settings-lab'>HW:</div><div className="setting-tag">H{pinf.hw.toString(16).toUpperCase().padStart(3, '0')}</div>
-					<div className='settings-lab'>BL:</div><div className="setting-tag">B{pinf.bl.toString(16).toUpperCase().padStart(3, '0')}</div>
-					<div className='settings-lab'>Info:</div><div className="setting-tag">{pinf.info}</div>
-				</div>
+			<div>
+				<h5 className='rtd-fw-info'>{pinf.info.replaceAll('\n', '; ')}</h5>
 			</div>
 		</div>
 	);

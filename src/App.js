@@ -19,15 +19,38 @@ function App() {
 	const [activeTab, setActiveTab] = useState('Runtime Data');
 	const [statusON, setStatusON] = useState(0);
 	const [runtimeData, setRuntimeData] = useState([]);
-	const [productInfo, setProductInfo] = useState({recver: 0, fw: 0, hw: 0, bl: 0,	info: ''});
+	const [productInfo, setProductInfo] = useState({recver: 0, fw: 0, hw: 0, bl: 0,	info: '---'});
+	const [isConnected, setIsConnected] = useState(true);
+	const [bootloaderInfo, setBootloaderInfo] = useState({ver: 0, date: 0, sts: 0});
 	
 	// Track handshake state and failed attempts
-	const fwInfoFetched = useRef(false);
+	const fetchCommand = useRef(0);	// 0 = fetch Fw Info; 1 = fetch Runtime Data; 2 = fetch Bootloader Info
 	const failedAttempts = useRef(0);
 	const MAX_FAILED_ATTEMPTS = 5;
 
 	const commandRtD = [0x36, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00];
 	const commandFwI = [0x36, 0xFF, 0x00, 0x00, 0x36, 0xFF, 0x00, 0x00];
+	const commandBlI = [0x36, 0xFE, 0x00, 0x00, 0x36, 0xFE, 0x00, 0x00];
+
+	const switchCommand = () => {
+		switch (activeTab)
+		{
+			case 'Runtime Data':
+				fetchCommand.current = 1;
+				break;
+			case 'Firmware Update':
+				fetchCommand.current = 2;
+				break;
+			case 'Test Interface':
+				fetchCommand.current = 2;
+				break;
+		}
+	}
+
+	const resetCommState = () => {
+		setBootloaderInfo({ver: 0, date: 0, sts: 0});
+		fetchCommand.current = 0; // Force commandFwI on next success
+	}
 
 	// Polling Logic with Auto-Reconnect/Handshake
 	useEffect(() => {
@@ -40,19 +63,19 @@ function App() {
 				isProcessing.current = true;
 				
 				// Select command based on handshake state
-				const currentCmd = !fwInfoFetched.current ? commandFwI : commandRtD;
+				let currentCmd = commandRtD;
+				switch (fetchCommand.current)
+				{
+					case 0: currentCmd = commandFwI; break;
+					case 1: currentCmd = commandRtD; break;
+					case 2: currentCmd = commandBlI; break;
+				}
 				const response = await serialRef.current.sendAndReceive(currentCmd);
 
 				if (response && response.length > 0) {
 					// SUCCESS: Reset failure counter
 					failedAttempts.current = 0;
 					setLastResponse(response);
-					
-					// If this was a successful FW info request, mark handshake as complete
-					if (!fwInfoFetched.current && response[0] == 0xC6) {
-						console.log("Handshake successful, switching to Runtime Data.");
-						fwInfoFetched.current = true;
-					}
 				} else {
 					// EMPTY RESPONSE: Treat as failure
 					throw new Error("Empty response");
@@ -63,8 +86,8 @@ function App() {
 				console.warn(`Attempt failed (${failedAttempts.current}/${MAX_FAILED_ATTEMPTS})`);
 
 				if (failedAttempts.current >= MAX_FAILED_ATTEMPTS) {
+					resetCommState();
 					console.error("Device considered disconnected. Handshake reset.");
-					fwInfoFetched.current = false; // Force commandFwI on next success
 					// Optional: setLastResponse([]) to clear UI on disconnect
 				}
 			} finally {
@@ -77,7 +100,7 @@ function App() {
 			timer = setInterval(poll, 500);
 		} else {
 			// Cleanup state when user stops polling
-			fwInfoFetched.current = false;
+			resetCommState();
 			failedAttempts.current = 0;
 		}
 
@@ -93,9 +116,16 @@ function App() {
 						setStatusON(lastResponse[8] + (lastResponse[9] << 8) + (lastResponse[10] << 16) + (lastResponse[11] << 24));
 						setRuntimeData(lastResponse);
 						break;
+					case 0xFE: // Bootloader Info
+						const bli = {
+							ver: lastResponse[4], 
+							date: lastResponse[8] + (lastResponse[9] << 8) + (lastResponse[10] << 16) + (lastResponse[11] << 24),
+							sts: lastResponse[12]
+						};
+						setBootloaderInfo(bli);
+						break;
 					case 0xFF: // Firmware Data Status
-						console.log("Firmware data packet received");
-						console.log(lastResponse);
+						console.log("Firmware info packet received");
 						const byteData = lastResponse.slice(20); // Vezme vše od 20. bajtu dál
 						const text = new TextDecoder().decode(new Uint8Array(byteData));
 						// Pokud víš, že string je ukončen nulou (null-terminated), 
@@ -110,7 +140,7 @@ function App() {
 							info: text.split('\0')[0]
 						};
 						setProductInfo(pinf);
-						console.log("Extracted string:", pinf);
+						switchCommand();
 						break;
 					default:
 						break;
@@ -149,6 +179,11 @@ function App() {
 		}
 	};
 
+	useEffect(() => {
+		if (!fetchCommand.current) return;
+		switchCommand();
+	}, [activeTab])
+
 	return (
 		<div className="app-container">
 			<header className="app-main-header">
@@ -171,6 +206,7 @@ function App() {
 						</div>
 						<div className="comm-group">
 							<SerialManager ref={serialRef} />
+							{isConnected?(
 							<button 
 								className='button-start-comm'
 								onClick={() => setIsPolling(!isPolling)}
@@ -178,6 +214,8 @@ function App() {
 							>
 								{isPolling ? '⏹️ STOP READING' : '▶️ START READING'}
 							</button>
+							):(
+							<button></button>)}
 						</div>
 					</section>
 
@@ -226,7 +264,7 @@ function App() {
 
 					<div className="tab-container">
 						{activeTab === 'Runtime Data' && <RuntimeData data={runtimeData} pinf={productInfo} />}
-						{activeTab === 'Firmware Update' && <FirmwareUpdate />}
+						{activeTab === 'Firmware Update' && <FirmwareUpdate blInfo={bootloaderInfo}/>}
 						{activeTab === 'Test Interface' && <TestInterface />}
 					</div>
 				</section>
