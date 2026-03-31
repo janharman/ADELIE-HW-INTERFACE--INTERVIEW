@@ -1,0 +1,154 @@
+/* --- ZÁKLADNÍ KONTEJNERY --- */
+.rtd-main-wrapper {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.rtd-container-div {
+	margin-top: 10px;
+	display: flex;
+	flex-direction: row;
+	gap: 10px;
+}
+
+.rtd-sts-div {
+	display: flex;
+	flex-direction: column;
+}
+
+/* --- SPOLEČNÉ LED STYLY --- */
+.sts-led-digi-in {
+	background-color: #222;
+	border-radius: 7px;
+	padding: 6px 10px;
+	font-size: 13px;
+	font-weight: bold;
+	font-family: 'Courier New', Courier, monospace;
+	margin: 3px;
+	white-space: nowrap;
+}
+
+/* --- BAREVNÉ STAVY --- */
+.sts-led-on-y {	background-color: rgb(208, 211, 1); color: rgb(33, 33, 33); }
+.sts-led-of-y {	background-color: rgb(90, 90, 0); color: rgb(201, 185, 0); }
+.sts-led-yellow { background-color: rgb(211, 211, 0); color: #000; }
+.sts-led-relay { background-color: red; color: white; }
+.sts-led-branch { background-color: rgb(0, 181, 0); color: white; }
+.sts-led-green { background-color: green; color: white; }
+.sts-led-orange { background-color: #bc6800; color: white; }
+.sts-led-blue { background-color: #0000ff; color: #fff; }
+.sts-led-red { background-color: #660000; color: #ffaaaa; }
+.sts-led-off { filter: brightness(0.4) grayscale(0.0); }
+.sts-led-gray { background-color: #444; color: #888; }
+.sts-led-fan-on { background-color: #10337f; color: #9df; border: 1px solid #9df; }
+
+/* --- VENTILÁTOR --- */
+.fan-icon {
+	display: inline-block;
+	margin-right: 3px;
+	font-weight: bold;
+	font-size: 14px;
+}
+
+.sts-led-green .fan-icon {
+	animation: spin-fan 2s linear infinite;
+}
+
+@keyframes spin-fan {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}
+
+.rtd-separator {
+	height: 1px;
+	background: linear-gradient(90deg, transparent 0%, #444 20%, #444 80%, transparent 100%);
+	margin: 10px 0 0 0;
+}
+
+.rtd-details-grid {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 20px;
+}
+
+.rtd-details-group h4 {
+	font-size: 11px;
+	color: #666;
+	text-transform: uppercase;
+	letter-spacing: 1.5px;
+	margin-bottom: 10px;
+	margin-top: 8px;
+}
+.rtd-details-group .rtd-last-group {
+	margin-bottom: 0;
+}
+.analog-grid {
+	display: flex;
+	gap: 10px;
+	width: 100%; 
+}
+
+.analog-item {
+	background: #161616;
+	padding: 10px 12px;
+	border-radius: 4px;
+	border: 1px solid #444;
+	border-left: 3px solid #222;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+.analog-item .label {
+	font-size: 10px;
+	color: #666;
+	font-weight: bold;
+	text-transform: uppercase;
+	white-space: nowrap; 
+	margin-right: 10px;
+}
+
+.analog-item .value {
+	font-family: 'Courier New', monospace;
+	font-size: 1.1rem;
+	font-weight: bold;
+	color: #eee;
+}
+
+/* Barvy lišt u analogů */
+.rail-24v { border-left-color: lime; } 
+.rail-5v { border-left-color: aqua; } 
+.rail-pd { border-left-color: rgb(49, 135, 255); } 
+.rail-19v { border-left-color: rgb(0, 237, 197); } 
+.rail-mcu-temp { border-left-color: #ff5f5f; }
+.rail-fan-temp { border-left-color: #ffa434; }
+
+/* Konfigurace tagy */
+.settings-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0px;
+	font-size: 12px;
+	font-family: monospace;
+	padding: 4px 0;
+	align-items: flex-start;
+	color: #aaa;
+}
+
+.settings-lab {
+	padding: 4px 0;
+}
+
+.setting-tag {
+	background: #2a2a2a;
+	color: #ccc;
+	padding: 4px 6px;
+	margin: 0 10px 0 3px;
+	border-radius: 3px;
+	font-size: 13px;
+	font-family: monospace;
+	border: 1px solid #333;
+	white-space: pre-line;
+}

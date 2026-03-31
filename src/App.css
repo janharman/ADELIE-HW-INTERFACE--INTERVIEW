@@ -1,38 +1,220 @@
-.App {
-  text-align: center;
+/* --- GLOBAL STYLES --- */
+body {
+	margin: 0;
+	padding: 0;
+	background-color: #121212;
+	color: white;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.app-container {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* --- HEADER & LOGO (CLEAN STATIC VERSION) --- */
+.app-main-header {
+	background: linear-gradient(90deg, #1a1a1a 0%, #004d00 50%, #1a1a1a 100%);
+	padding: 8px 30px;
+	border-bottom: 2px solid #008800;
+	box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.header-content {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 }
 
-.App-link {
-  color: #61dafb;
+.logo-container {
+	flex: 1;
+	display: flex;
+	justify-content: flex-start;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.logo-wrapper {
+	display: inline-block;
+	height: auto;
+	width: auto;
 }
+
+.company-logo {
+	height: 40px;
+	width: auto;
+	display: block;
+	/* Subtle glow to make the logo pop against the dark background */
+	filter: drop-shadow(0 0 2px rgba(0, 255, 0, 0.2));
+}
+
+.app-main-header h1 {
+	flex: 3;
+	margin: 0;
+	font-size: 22px;
+	letter-spacing: 3px;
+	color: #fff;
+	text-shadow: 0 0 10px rgba(0,255,0,0.5);
+	text-align: center;
+}
+
+.header-spacer {
+	flex: 1;
+}
+
+/* --- MAIN LAYOUT --- */
+.main-dashboard-grid {
+	display: grid;
+	grid-template-columns: 350px 1fr;
+	gap: 20px;
+	padding: 15px;
+	align-items: start;
+}
+
+.left-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+/* --- PANEL SECTIONS (SIDEBAR) --- */
+.panel-section {
+	background-color: #1e1e1e;
+	border: 1px solid #333;
+	border-radius: 8px;
+	padding: 12px;
+	box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.section-header-with-icon {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid #333;
+	margin-bottom: 5px;
+	padding-bottom: 5px;
+}
+
+.section-title {
+	margin-top: 0;
+	margin-bottom: 5px;
+	font-size: 14px;
+	color: #aaa;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.section-header-with-icon .section-title {
+	border-bottom: none;
+	margin-bottom: 0;
+}
+
+/* --- DATA MONITOR (HEX) --- */
+.data-len-tag {
+	background-color: #333;
+	padding: 2px 6px;
+	border-radius: 3px;
+	font-size: 11px;
+	color: #00ff00;
+	margin-left: 10px;
+}
+
+.div-raw-rec-data-container {
+	background-color: #0a0a0a;
+	color: #33ff33;
+	padding: 8px;
+	border-radius: 4px;
+	font-family: 'Courier New', monospace;
+	font-size: 10px;
+	height: 72px;
+	overflow-y: auto;
+	border: 1px solid #00ff0033;
+}
+
+.no-data-msg {
+	color: #444;
+	font-style: italic;
+	text-align: center;
+	padding-top: 45px;
+}
+
+.hex-row {
+	display: flex;
+	gap: 4px;
+	border-bottom: 1px solid #1a1a1a;
+}
+
+.hex-offset { color: #666; margin-right: 4px; }
+.hex-byte { min-width: 2.1ch; text-align: center; }
+
+/* --- RIGHT PANEL & TABS --- */
+.right-panel {
+	background-color: #1e1e1e;
+	border: 1px solid #333;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.tab-bar {
+	display: flex;
+	background-color: #161616;
+	border-bottom: 1px solid #333;
+	padding-top: 5px;
+	padding-left: 10px;
+}
+
+.tab-btn {
+	padding: 10px 20px;
+	background-color: #2a2a2a;
+	color: #aaa;
+	border: 1px solid #333;
+	border-bottom: none;
+	border-radius: 6px 6px 0 0;
+	margin-right: 4px;
+	cursor: pointer;
+	font-weight: bold;
+	transition: all 0.2s;
+}
+
+.tab-btn.active {
+	background-color: #1e1e1e;
+	color: #00ff00;
+	position: relative;
+}
+
+.tab-btn.active::after {
+	content: '';
+	position: absolute;
+	top: -1px; left: 0; right: 0;
+	height: 2px;
+	background-color: #00ff00;
+}
+
+.tab-container {
+	padding: 20px;
+	min-height: 500px;
+}
+
+/* --- GLOBAL CONTROLS --- */
+.button-start-comm {
+	width: 100%;
+	padding: 10px;
+	font-size: 13px;
+	font-weight: bold;
+	cursor: pointer;
+	border-radius: 4px;
+	border: none;
+	color: white;
+	margin-top: 10px;
+	transition: opacity 0.2s;
+}
+
+.app-footer {
+	text-align: center;
+	padding: 15px;
+	color: #333;
+	font-size: 11px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }

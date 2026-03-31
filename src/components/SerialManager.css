@@ -1,0 +1,68 @@
+/* --- SERIAL MANAGER COMPONENT STYLES --- */
+
+.status-badge-container {
+    width: 100%;
+    margin-bottom: 2px;
+}
+
+.status-badge {
+    font-size: 11px;
+    padding: 5px;
+    border-radius: 4px;
+    text-align: center;
+    background: #000;
+    border: 1px solid #333;
+    font-family: monospace;
+    display: block;
+}
+
+/* Connection states */
+.status-badge.online { 
+    color: #00ff00; 
+    border-color: #008800;
+    box-shadow: inset 0 0 5px rgba(0, 255, 0, 0.2);
+}
+
+.status-badge.offline { 
+    color: #ff4444; 
+    border-color: #660000;
+}
+
+/* Row for Connect/Disconnect buttons */
+.serial-btn-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.serial-btn-row button {
+    flex: 1; /* Split width 50/50 */
+    white-space: nowrap;
+    padding: 8px 4px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: opacity 0.2s;
+}
+
+/* Button variants */
+.btn-conn { 
+    background-color: #444; 
+    color: white; 
+    border: 1px solid #555; 
+}
+
+.btn-disc { 
+    background-color: #600; 
+    color: white; 
+    border: 1px solid #800; 
+}
+
+.btn-conn:hover, .btn-disc:hover {
+    opacity: 0.8;
+}

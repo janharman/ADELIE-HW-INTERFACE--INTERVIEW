@@ -1,0 +1,121 @@
+/* --- CONTROL PANEL - COMPACT LAYOUT --- */
+.control-groups-container {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.control-sub-row {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.control-label {
+	font-size: 9px;
+	color: #666;
+	font-weight: bold;
+	letter-spacing: 1px;
+	margin-bottom: 5px;
+}
+
+/* Gridy pro rozložení tlačítek */
+.control-grid-4 { 
+	display: grid; 
+	grid-template-columns: repeat(4, 1fr); 
+	gap: 5px; 
+}
+
+.control-grid-3 { 
+	display: grid; 
+	grid-template-columns: repeat(3, 1fr); 
+	gap: 5px; 
+}
+
+/* Základní styl tlačítek Relé a Branch */
+.btn-ctrl {
+	background-color: #2a2a2a;
+	border: 1px solid #444;
+	color: #ccc;
+	padding: 6px 0;
+	font-size: 11px;
+	font-weight: bold;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.2s;
+}
+.btn-ctrl.rele {
+	background-color: #400000;
+	border: 1px solid #c00;
+}
+
+.btn-ctrl:hover {
+	background-color: #333;
+	border-color: #00ff00;
+	color: #fff;
+}
+
+/* Styly pro Semafor (Signal Tower) */
+.btn-light {
+	border: 1px solid #222;
+	padding: 6px 0;
+	font-size: 10px;
+	font-weight: bold;
+	border-radius: 4px;
+	cursor: pointer;
+	color: #fff;
+	opacity: 0.8;
+}
+
+.btn-light:hover { 
+	opacity: 1; 
+	border-color: #fff; 
+}
+
+.btn-light.gn { background-color: #006600; box-shadow: inset 0 0 5px rgba(0,255,0,0.3); }
+.btn-light.or { background-color: #885500; box-shadow: inset 0 0 5px rgba(255,170,0,0.3); }
+.btn-light.rd { background-color: #660000; box-shadow: inset 0 0 5px rgba(255,0,0,0.3); }
+.btn-light.bu { background-color: #003366; box-shadow: inset 0 0 5px rgba(0,170,255,0.3); }
+
+/* --- AKTIVNÍ STAVY --- */
+
+/* Pro Relé a Branche - zelené podsvícení textu i okraje */
+.btn-ctrl.active {
+	background-color: #1a4d1a;
+	border-color: #00ff00;
+	color: #fff;
+	box-shadow: 0 0 10px rgba(0, 255, 0, 0.4);
+}
+.btn-ctrl.active.rele {
+	background-color: rgb(184, 0, 0);
+	border-color: rgb(255, 0, 0);
+	color: #fff;
+	box-shadow: 0 0 10px rgb(255, 53, 53);
+}
+
+/* Pro Semafor - plná barva bez průhlednosti a silnější glow */
+.btn-light.active {
+	opacity: 1;
+	border-color: #fff;
+	box-shadow: 0 0 15px currentColor; /* Použije barvu pozadí tlačítka */
+}
+
+/* Specifické glow pro barvy semaforu při aktivaci */
+.btn-light.gn.active { box-shadow: 0 0 12px #00ff00; }
+.btn-light.or.active { box-shadow: 0 0 12px #ffaa00; }
+.btn-light.rd.active { box-shadow: 0 0 12px #ff0000; }
+.btn-light.bu.active { box-shadow: 0 0 12px #00aaff; }
+
+.control-grid-1 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 5px;
+}
+
+/* Můžeš přidat speciální efekt pro testovací tlačítko, aby se nepletlo s provozními */
+.btn-ctrl.fan-test {
+    background-color: #003366;
+    border-color: #0088ff;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(0, 136, 255, 0.4);
+}
