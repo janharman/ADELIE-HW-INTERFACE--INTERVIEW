@@ -168,9 +168,9 @@ const FirmwareUpdate = ({ blInfo, productInfo }) => {
 
                 <div className="fw-control-sidebar">
                     <div className="fw-btn-group">
-                        <button className="fw-cmd-btn mini">Bootloader</button>
-                        <button className="fw-cmd-btn mini">Reset</button>
-                        <button className="fw-start-btn primary mini">FLASH</button>
+                        <button className="fw-cmd-btn mini">Go To Bootloader</button>
+                        <button className="fw-cmd-btn mini">Device Reset</button>
+                        <button className="fw-start-btn primary mini">FLASH FIRMWARE</button>
                     </div>
 
                     <div className="fw-indicators compact">

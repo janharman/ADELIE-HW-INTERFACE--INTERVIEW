@@ -10,6 +10,58 @@ const SerialManager = forwardRef((props, ref) => {
 	
 	const STORAGE_KEY = 'last_used_serial_port_index';
 
+// 1. Definujeme funkci pro handleDisconnect mimo useEffect, aby byla stabilní
+    const handlePhysicalDisconnect = (event) => {
+        console.warn("Hardware event: Device lost", event.port);
+        
+        // Zde je ten trik: Pokud máme jakýkoliv aktivní port a systém nahlásí odpojení,
+        // prostě vyvoláme totální úklid.
+        if (portRef.current) {
+            // Voláme přímo interní úklid
+            forceShutdown();
+        }
+    };
+
+    // 2. Speciální funkce pro okamžité "zabití" spojení bez čekání na promisy
+    const forceShutdown = () => {
+        keepReading.current = false;
+        if (readerRef.current) {
+            try { readerRef.current.cancel(); } catch(e) {}
+        }
+        portRef.current = null;
+        readerRef.current = null;
+        setStatus('Disconnected');
+        console.log("Status forced to Disconnected");
+		if (props.onConnectionChange) props.onConnectionChange(false);
+    };
+
+    useEffect(() => {
+        // Registrace na globální navigator.serial
+        if (navigator.serial) {
+            navigator.serial.addEventListener('disconnect', handlePhysicalDisconnect);
+        }
+
+        const autoConnect = async () => {
+            if (!navigator.serial) return;
+            const allowedPorts = await navigator.serial.getPorts();
+            if (allowedPorts.length > 0) {
+                const savedIndex = localStorage.getItem(STORAGE_KEY);
+                const indexToOpen = savedIndex !== null ? parseInt(savedIndex, 10) : 0;
+                if (allowedPorts[indexToOpen]) {
+                    await initializePort(allowedPorts[indexToOpen], indexToOpen);
+                }
+            }
+        };
+        autoConnect();
+
+        return () => {
+            if (navigator.serial) {
+                navigator.serial.removeEventListener('disconnect', handlePhysicalDisconnect);
+            }
+            disconnect();
+        };
+    }, []);
+	
 	const disconnect = async () => {
 		if (!portRef.current) return;
 		setStatus('Disconnecting...');
@@ -36,6 +88,7 @@ const SerialManager = forwardRef((props, ref) => {
 		portRef.current = null;
 		readerRef.current = null;
 		setStatus('Disconnected');
+		if (props.onConnectionChange) props.onConnectionChange(false);
 	};
 
 	const readLoop = async (port) => {
@@ -72,30 +125,16 @@ const SerialManager = forwardRef((props, ref) => {
 			portRef.current = port;
 			localStorage.setItem(STORAGE_KEY, index.toString());
 			setStatus(`Connected (Port #${index + 1})`);
+			if (props.onConnectionChange) props.onConnectionChange(true);
 			readLoop(port);
 			return true;
 		} catch (err) {
 			console.error("Failed to open port:", err);
 			setStatus('Error Opening Port');
+			if (props.onConnectionChange) props.onConnectionChange(false);
 			return false;
 		}
 	};
-
-	useEffect(() => {
-		const autoConnect = async () => {
-			if (!navigator.serial) return;
-			const allowedPorts = await navigator.serial.getPorts();
-			if (allowedPorts.length > 0) {
-				const savedIndex = localStorage.getItem(STORAGE_KEY);
-				const indexToOpen = savedIndex !== null ? parseInt(savedIndex, 10) : 0;
-				if (allowedPorts[indexToOpen]) {
-					await initializePort(allowedPorts[indexToOpen], indexToOpen);
-				}
-			}
-		};
-		autoConnect();
-		return () => { disconnect(); };
-	}, []);
 
 	const connectManually = async () => {
 		try {

@@ -184,6 +184,13 @@ function App() {
 		switchCommand();
 	}, [activeTab])
 
+	const handleConnectionChange = (connected) => {
+		if (!connected) {
+			setIsPolling(false);
+			resetCommState();
+		}
+	};
+
 	return (
 		<div className="app-container">
 			<header className="app-main-header">
@@ -205,7 +212,7 @@ function App() {
 							<h2 className="section-title">Connection & Polling</h2>
 						</div>
 						<div className="comm-group">
-							<SerialManager ref={serialRef} />
+							<SerialManager ref={serialRef} onConnectionChange={handleConnectionChange}/>
 							{isConnected?(
 							<button 
 								className='button-start-comm'
@@ -264,7 +271,7 @@ function App() {
 
 					<div className="tab-container">
 						{activeTab === 'Runtime Data' && <RuntimeData data={runtimeData} pinf={productInfo} />}
-						{activeTab === 'Firmware Update' && <FirmwareUpdate blInfo={bootloaderInfo}/>}
+						{activeTab === 'Firmware Update' && <FirmwareUpdate blInfo={bootloaderInfo} productInfo={productInfo}/>}
 						{activeTab === 'Test Interface' && <TestInterface />}
 					</div>
 				</section>
