@@ -2,8 +2,8 @@
 
 .fw-update-content {
     display: flex;
-    flex-direction: column;
     gap: 15px;
+	justify-content: space-between;
 }
 
 /* File selection styling */
@@ -43,10 +43,9 @@
 
 /* Main Grid Layout: Table (4/5) and Controls (1/5) */
 .fw-main-grid {
-    display: grid;
-    grid-template-columns: 4fr 1fr;
     gap: 15px;
     min-height: 450px;
+	flex: 1;
 }
 
 /* Data Table Container */
@@ -58,19 +57,19 @@
 
 /* Right Sidebar Styling */
 .fw-control-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 12px;
+    padding: 15px;
     background: #1a1a1a;
-    border: 1px solid #333;
+    border: 1px solid #444;
     border-radius: 4px;
+	width: 25%;
+	min-width: 200px;
+	max-width: 300px;
 }
 
 .fw-btn-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 15px;
 }
 
 .fw-cmd-btn, .fw-start-btn {
@@ -217,3 +216,68 @@
     font-weight: bold;
     width: 30%;
 }
+
+.fw-flash-map-container {
+    margin-top: 20px;
+    background: #080808;
+    padding: 15px;
+    border: 1px solid #222;
+}
+
+.flash-grid-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Courier New', monospace;
+}
+
+.flash-grid-table th {
+    background: #111;
+    color: #555;
+    font-size: 13px;
+    padding: 5px;
+    border: 1px solid #222;
+}
+
+.base-addr {
+    background: #111;
+    color: #888;
+    font-weight: bold;
+    text-align: center;
+    font-size: 14px;
+    border: 1px solid #222;
+    width: 80px;
+}
+
+.flash-cell {
+    border: 1px solid #222;
+	padding: 5px;
+    width: 20%;
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+    transition: opacity 0.2s;
+}
+
+.flash-cell:hover {
+    filter: brightness(1.2);
+}
+
+.cell-label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.cell-addr-small {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.3);
+    margin-top: 2px;
+}
+
+/* Barevné kódování buněk */
+.flash-cell.fw { background: #002b80; border-color: #0044cc; }
+.flash-cell.setup { background: #4d4d00; border-color: #808000; }
+.flash-cell.boot { background: #004d26; border-color: #008040; }
+.flash-cell.empty { background: #111; border-color: #222; color: #333; }
+
+.flash-cell.empty .cell-label { color: #333; }

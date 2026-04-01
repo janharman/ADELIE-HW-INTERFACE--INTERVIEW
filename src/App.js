@@ -4,7 +4,7 @@ import logo from './assets/logo-ecogate.png';
 import SerialManager from './components/SerialManager';
 import TestInterface from './components/TestInterface';
 import RuntimeData from './components/RuntimeData';
-import FirmwareUpdate from './components/FirmwareUpdate';
+import FirmwareUpdate from './components/FwUpdate';
 import ControlPanel from './components/ControlPanel';
 
 /**
@@ -30,7 +30,7 @@ function App() {
 
 	const commandRtD = [0x36, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00];
 	const commandFwI = [0x36, 0xFF, 0x00, 0x00, 0x36, 0xFF, 0x00, 0x00];
-	const commandBlI = [0x36, 0xFE, 0x00, 0x00, 0x36, 0xFE, 0x00, 0x00];
+	const commandBlI = [0x36, 0xB1, 0x00, 0x00, 0x36, 0xB1, 0x00, 0x00];
 
 	const switchCommand = () => {
 		switch (activeTab)
@@ -116,7 +116,7 @@ function App() {
 						setStatusON(lastResponse[8] + (lastResponse[9] << 8) + (lastResponse[10] << 16) + (lastResponse[11] << 24));
 						setRuntimeData(lastResponse);
 						break;
-					case 0xFE: // Bootloader Info
+					case 0xB1: // Bootloader Info
 						const bli = {
 							ver: lastResponse[4], 
 							date: lastResponse[8] + (lastResponse[9] << 8) + (lastResponse[10] << 16) + (lastResponse[11] << 24),
@@ -154,16 +154,35 @@ function App() {
 	/**
 	 * Manual Command Handler
 	 */
-	const handleManualCommand = async (label, mask) => {
-		if (!serialRef.current) return;
+	const handleManualCommand = async (label, regType, mask) => {
+		if (!serialRef.current)
+		{
+			console.log(label + ' ---> Cannot be performed. Serial port failed.');
+			return;
+		}
 		try {
-			isProcessing.current = true; 
+			isProcessing.current = true;
 			let outD = [0x02005231, 0, 0, 0];
-			if (mask & statusON) outD[2] = mask; else outD[1] = mask;
-			outD[3] = outD[0] ^ outD[1] ^ outD[2];
+			let cnt = 4;
+			switch (regType)
+			{
+				case 0x52:	// Control Command = 2 regs
+					// already set by default
+					if (mask & statusON) outD[2] = mask; else outD[1] = mask;
+					break;
+				case 0xB0:	// Go To Bootloader / Device Reset
+					outD[0] = 0x0100B031;
+					outD[1] = mask;
+					cnt = 3;
+					break;
+			}
+			let crc = 0;
+			for (let d = 0; d < (cnt-1); d++)
+				crc ^= outD[d];
+			outD[cnt-1] = crc;
 
 			let hexArray = [];
-			for (let d = 0; d < 4; d++) {
+			for (let d = 0; d < cnt; d++) {
 				let x = outD[d];
 				for (let i = 0; i < 4; i++) {
 					hexArray.push(x & 0xFF);
@@ -172,6 +191,7 @@ function App() {
 			}
 			const response = await serialRef.current.sendAndReceive(hexArray);			
 			setLastResponse(response);
+			console.log(label + ' ...sent');
 		} catch (err) {
 			console.error(`Manual command ${label} failed:`, err);
 		} finally {
@@ -271,7 +291,7 @@ function App() {
 
 					<div className="tab-container">
 						{activeTab === 'Runtime Data' && <RuntimeData data={runtimeData} pinf={productInfo} />}
-						{activeTab === 'Firmware Update' && <FirmwareUpdate blInfo={bootloaderInfo} productInfo={productInfo}/>}
+						{activeTab === 'Firmware Update' && <FirmwareUpdate blInfo={bootloaderInfo} productInfo={productInfo} onCommand={handleManualCommand}/>}
 						{activeTab === 'Test Interface' && <TestInterface />}
 					</div>
 				</section>

@@ -1,0 +1,73 @@
+/* FwFlashMap.css */
+
+.fw-flash-map-container {
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 15px;
+}
+
+.map-title {
+    color: #aaa;
+    font-size: 13px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.map-scroll-area {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #222;
+}
+
+.flash-map-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+}
+
+.flash-map-table th {
+    position: sticky;
+    top: 0;
+    background: #1a1a1a;
+    color: #888;
+    padding: 8px;
+    text-align: left;
+    border-bottom: 2px solid #333;
+    z-index: 1;
+}
+
+.flash-map-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #1a1a1a;
+    color: #ccc;
+}
+
+/* Legend styling */
+.map-legend {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: #666;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.color-box {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.color-box.fw { background: #003399; }
+.color-box.setup { background: #555500; }
+.color-box.boot { background: #004422; }
+.color-box.empty { background: #1a1a1a; border: 1px solid #333; }
