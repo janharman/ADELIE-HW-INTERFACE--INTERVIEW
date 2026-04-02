@@ -13,13 +13,21 @@ export const FLASH_MEMORY_LAYOUT = [
 ];
 
 const FwFlashMap = ({ buffer }) => {
-    const ROW_SIZE = 16 * 1024;    // 16 kB na řádek
-    const COLUMN_SIZE = 4 * 1024;  // 4 kB na buňku
-    const TOTAL_ROWS = 16;         // 16 řádků pro 256 kB
+	const PART_SIZE = 1024;
+    const COLUMN_SIZE = 4 * PART_SIZE;  		// 4 kB na buňku
+    const ROW_SIZE = COLUMN_SIZE * 4;   // 16 kB na řádek
+    const TOTAL_ROWS = 16;         		// 16 řádků pro 256 kB
 
     // Funkce pro kontrolu, zda jsou v 4kB bloku nějaká data
     const hasData = (addr) => {
         for (let i = 0; i < COLUMN_SIZE; i++) {
+            if (buffer[addr + i] !== 0xFF) return true;
+        }
+        return false;
+    };
+
+	const partData = (addr) => {
+        for (let i = 0; i < PART_SIZE; i++) {
             if (buffer[addr + i] !== 0xFF) return true;
         }
         return false;
@@ -50,9 +58,17 @@ const FwFlashMap = ({ buffer }) => {
             const cellAddr = rowStartAddr + (j * COLUMN_SIZE);
             const active = hasData(cellAddr); // Kontrola dat v HEXu
             
+			const colpart = [];
+			for (let k=0; k<4; k++)
+			{
+				 colpart.push({
+					yes: partData(cellAddr + k*1024)
+				 });
+			}
             columns.push({
                 addr: cellAddr,
                 active: active,
+				part: colpart,
                 ...getCellInfo(cellAddr)
             });
         }
@@ -67,9 +83,9 @@ const FwFlashMap = ({ buffer }) => {
                     <tr>
                         <th>Base Addr</th>
                         <th>+0000</th>
-                        <th>+4000</th>
-                        <th>+8000</th>
-                        <th>+C000</th>
+                        <th>+1000</th>
+                        <th>+2000</th>
+                        <th>+3000</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -84,8 +100,15 @@ const FwFlashMap = ({ buffer }) => {
                                     className={`flash-cell ${getTypeClass(cell.type)} ${!cell.active ? 'inactive' : ''}`}
                                     title={cell.active ? `Data present at 0x${cell.addr.toString(16).toUpperCase()}` : 'Empty sector'}
                                 >
-                                    {/* Text zobrazíme jen pokud jsou v buňce data */}
-                                    {cell.active && <div className="cell-label">{cell.label}</div>}
+									<div className="cell-label">
+										{/* Text zobrazíme jen pokud jsou v buňce data */}
+										{cell.active? cell.label: '.'}
+									</div>
+									<div className='cell-parts'>
+										{cell.part.map((part) => (
+											<div className={`cell-part-div ${part.yes?'has-data':''}`}></div>
+										))}
+									</div>
                                 </td>
                             ))}
                         </tr>

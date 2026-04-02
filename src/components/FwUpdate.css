@@ -1,12 +1,33 @@
 /* --- FirmwareUpdate.css --- */
 
+/* Globální kontejnery */
 .fw-update-content {
     display: flex;
     gap: 15px;
-	justify-content: space-between;
+    justify-content: space-between;
 }
 
-/* File selection styling */
+.fw-main-grid {
+    gap: 15px;
+    min-height: 450px;
+    flex: 1;
+}
+
+/* Sidebar (Ovládací panel) */
+.fw-control-sidebar {
+    padding: 15px;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    width: 25%;
+    min-width: 200px;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Výběr souboru */
 .fw-file-row {
     display: flex;
     width: 100%;
@@ -41,31 +62,7 @@
     background: #444;
 }
 
-/* Main Grid Layout: Table (4/5) and Controls (1/5) */
-.fw-main-grid {
-    gap: 15px;
-    min-height: 450px;
-	flex: 1;
-}
-
-/* Data Table Container */
-.fw-table-section {
-    background: #111;
-    border: 1px solid #222;
-    border-radius: 4px;
-}
-
-/* Right Sidebar Styling */
-.fw-control-sidebar {
-    padding: 15px;
-    background: #1a1a1a;
-    border: 1px solid #444;
-    border-radius: 4px;
-	width: 25%;
-	min-width: 200px;
-	max-width: 300px;
-}
-
+/* Tlačítka */
 .fw-btn-group {
     display: flex;
     flex-direction: column;
@@ -104,7 +101,7 @@
     box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
 }
 
-/* Indicators and BL Info Block */
+/* Indikátory a Bootloader Info */
 .fw-indicators {
     display: flex;
     flex-direction: column;
@@ -130,13 +127,11 @@
     border: 1px solid #333;
 }
 
-/* Status Dot Colors */
 .dot-on-green { background: #00ff00; box-shadow: 0 0 8px rgba(0, 255, 0, 0.4); }
 .dot-on-blue { background: #0088ff; box-shadow: 0 0 8px rgba(0, 136, 255, 0.4); }
 .dot-on-red { background: #ff0000; box-shadow: 0 0 8px rgba(255, 0, 0, 0.4); }
 .dot-off { background: #111; }
 
-/* Bootloader Info Terminal Style */
 .bl-info-block {
     margin-top: 10px;
     padding: 10px;
@@ -155,24 +150,17 @@
     font-size: 15px;
 }
 
-.bl-info-item label {
-    color: #666;
+.bl-info-item label { color: #666; }
+.bl-info-item span { color: #11aaff; font-weight: bold; }
+
+/* Porovnávací tabulka */
+.fw-table-section {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
-.bl-info-item span {
-    color: #11aaff;
-	font-weight: bold;
-}
-
-.fw-footer-status {
-    font-size: 10px;
-    color: #444;
-    text-transform: uppercase;
-}
-
-.status-text-ready { color: #00ff00; }
-
-/* --- Comparison Table Styling --- */
 .fw-comparison-table {
     width: 100%;
     border-collapse: collapse;
@@ -196,27 +184,13 @@
     color: #ccc;
 }
 
-.fw-comparison-table tr:hover {
-    background: #111;
-}
+.fw-comparison-table tr:hover { background: #111; }
 
-/* Highlight columns */
-.val-file {
-    color: #00ff00; /* Green for new file data */
-    font-family: monospace;
-}
+.val-file { color: #00ff00; font-family: monospace; }
+.val-device { color: #0088ff; font-family: monospace; }
+.fw-comparison-table td:first-child { color: #777; font-weight: bold; width: 30%; }
 
-.val-device {
-    color: #0088ff; /* Blue for current device data */
-    font-family: monospace;
-}
-
-.fw-comparison-table td:first-child {
-    color: #777;
-    font-weight: bold;
-    width: 30%;
-}
-
+/* Flash Memory Map */
 .fw-flash-map-container {
     margin-top: 20px;
     background: #080808;
@@ -250,34 +224,71 @@
 
 .flash-cell {
     border: 1px solid #222;
-	padding: 5px;
-    width: 20%;
     text-align: center;
     vertical-align: middle;
-    position: relative;
-    transition: opacity 0.2s;
-}
-
-.flash-cell:hover {
-    filter: brightness(1.2);
+    transition: filter 0.2s;
+	position: relative;
 }
 
 .cell-label {
     font-size: 13px;
     font-weight: bold;
     color: #fff;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	white-space: nowrap;
+	pointer-events: none;
+	z-index: 2;
 }
 
-.cell-addr-small {
-    font-size: 9px;
-    color: rgba(255, 255, 255, 0.3);
-    margin-top: 2px;
+.cell-parts {
+	display: flex;
+	gap: 2px;
+	font-size: 8px;
+}
+.cell-part-div {
+	background: transparent;
+	width: 25%;
+	flex: 1;
+	height: 15px;
 }
 
-/* Barevné kódování buněk */
-.flash-cell.fw { background: #002b80; border-color: #0044cc; }
+.cell-part-div.has-data {
+	background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Barevné kódování buněk Flash Mapy */
+.flash-cell.fw { background: #0042bc; border-color: #0044cc; }
 .flash-cell.setup { background: #4d4d00; border-color: #808000; }
 .flash-cell.boot { background: #004d26; border-color: #008040; }
 .flash-cell.empty { background: #111; border-color: #222; color: #333; }
+.flash-cell.empty .cell-label { color: #555; }
+.flash-cell.inactive { filter:brightness(0.6) }
 
-.flash-cell.empty .cell-label { color: #333; }
+/* Legenda */
+.map-legend {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: #666;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.color-box {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.color-box.fw { background: #003399; }
+.color-box.setup { background: #555500; }
+.color-box.boot { background: #004422; }
+.color-box.empty { background: #1a1a1a; border: 1px solid #333; }
