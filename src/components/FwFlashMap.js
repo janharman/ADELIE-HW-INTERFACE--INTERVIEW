@@ -13,8 +13,10 @@ export const FLASH_MEMORY_LAYOUT = [
 ];
 
 const FwFlashMap = ({ buffer }) => {
-	const PART_SIZE = 1024;
-    const COLUMN_SIZE = 4 * PART_SIZE;  		// 4 kB na buňku
+	const SECTOR_SIZE = 4096;
+	const PART_SIZE = 256;
+    const COLUMN_SIZE = SECTOR_SIZE;  		// 4 kB na buňku
+	const COLUMN_PARTS = COLUMN_SIZE / PART_SIZE;
     const ROW_SIZE = COLUMN_SIZE * 4;   // 16 kB na řádek
     const TOTAL_ROWS = 16;         		// 16 řádků pro 256 kB
 
@@ -59,10 +61,10 @@ const FwFlashMap = ({ buffer }) => {
             const active = hasData(cellAddr); // Kontrola dat v HEXu
             
 			const colpart = [];
-			for (let k=0; k<4; k++)
+			for (let k=0; k < COLUMN_PARTS; k++)
 			{
 				 colpart.push({
-					yes: partData(cellAddr + k*1024)
+					yes: partData(cellAddr + k * PART_SIZE)
 				 });
 			}
             columns.push({
@@ -120,6 +122,7 @@ const FwFlashMap = ({ buffer }) => {
                 <span className="legend-item"><i className="color-box fw"></i> Firmware</span>
                 <span className="legend-item"><i className="color-box setup"></i> Setup</span>
                 <span className="legend-item"><i className="color-box boot"></i> Bootloader</span>
+                <span className="legend-item">Each cell is one sector = 4096 Bytes. Each sector is divided to 16 (communication) parts.</span>
             </div>
         </div>
     );
