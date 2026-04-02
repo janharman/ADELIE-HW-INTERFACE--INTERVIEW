@@ -152,7 +152,7 @@ const SerialManager = forwardRef((props, ref) => {
 			const writer = portRef.current.writable.getWriter();
 			await writer.write(new Uint8Array(dataArray));
 			writer.releaseLock();
-			await new Promise(r => setTimeout(r, 100));
+			await new Promise(r => setTimeout(r, 150));
 			return [...incomingBuffer.current];
 		},
 		disconnect

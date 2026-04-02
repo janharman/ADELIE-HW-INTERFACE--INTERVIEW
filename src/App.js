@@ -154,49 +154,72 @@ function App() {
 	/**
 	 * Manual Command Handler
 	 */
-	const handleManualCommand = async (label, regType, mask) => {
+	const handleManualCommand = async (label, regType, mask, dataPayload=null) => {
 		if (!serialRef.current)
 		{
 			console.log(label + ' ---> Cannot be performed. Serial port failed.');
 			return;
 		}
 		try {
+			console.log(label);
 			isProcessing.current = true;
-			let outD = [0x02005231, 0, 0, 0];
-			let cnt = 4;
-			switch (regType)
-			{
-				case 0x52:	// Control Command = 2 regs
-					// already set by default
-					if (mask & statusON) outD[2] = mask; else outD[1] = mask;
-					break;
-				case 0xB0:	// Go To Bootloader / Device Reset
-					outD[0] = 0x0100B031;
-					outD[1] = mask;
-					cnt = 3;
-					break;
-			}
-			let crc = 0;
-			for (let d = 0; d < (cnt-1); d++)
-				crc ^= outD[d];
-			outD[cnt-1] = crc;
 
+			let outD = [];
+			let cnt = 0;
+
+			switch (regType) {
+			case 0xB0: // Reset / Bootloader
+				outD = [0x0100B031, mask, 0]; // 3. prvek je místo pro CRC
+				cnt = 3;
+				break;
+
+			case 0xBF: // FLASH FIRMWARE (1 kB)
+				// dataPayload je Uint8Array (1024 bytes) -> převedeme na 256 Uint32 prvků
+				const data32 = new Uint32Array(dataPayload.buffer);
+				
+				outD = [
+					0x0000BF31 + (mask << 16), // Command + Register + RegNr + Cnt (Cnt = 0 == 256)
+					...Array.from(data32), // Celý payload v uint32
+					0           // Místo pro výsledné CRC na konci
+				];
+				cnt = outD.length;
+				break;
+
+			default: // Standardní Control Command (např. 0x52)
+				outD = [0x02005231, 0, 0, 0];
+				if (mask & statusON) outD[2] = mask; else outD[1] = mask;
+				cnt = 4;
+				break;
+			}
+
+			// 2. Výpočet CRC z celého pole (vše kromě posledního prvku)
+			let crc = 0;
+			for (let d = 0; d < (cnt - 1); d++) {
+				crc ^= outD[d];
+			}
+			outD[cnt - 1] = crc; // Uložení CRC na konec pole
+
+			// 3. Rozházení 32-bit uintů do 8-bit hexArray (Little Endian)
 			let hexArray = [];
 			for (let d = 0; d < cnt; d++) {
 				let x = outD[d];
-				for (let i = 0; i < 4; i++) {
-					hexArray.push(x & 0xFF);
-					x >>= 8;
-				}
+				hexArray.push(x & 0xFF);
+				hexArray.push((x >> 8) & 0xFF);
+				hexArray.push((x >> 16) & 0xFF);
+				hexArray.push((x >> 24) & 0xFF);
 			}
-			const response = await serialRef.current.sendAndReceive(hexArray);			
+
+			// 4. Odeslání a návrat odpovědi
+			const response = await serialRef.current.sendAndReceive(hexArray);
 			setLastResponse(response);
-			console.log(label + ' ...sent');
+			return response;
+
 		} catch (err) {
-			console.error(`Manual command ${label} failed:`, err);
+			console.error(`Command ${label} failed:`, err);
+			return null;
 		} finally {
 			isProcessing.current = false;
-		}
+		}	
 	};
 
 	useEffect(() => {

@@ -78,7 +78,6 @@
     font-size: 14px;
     font-weight: bold;
     cursor: pointer;
-    text-transform: uppercase;
     transition: all 0.2s;
 }
 
@@ -87,12 +86,22 @@
     color: #fff;
 }
 
+.fw-cmd-btn.status {
+    background: #353;
+    color: #dfd;
+}
+
+.fw-cmd-btn.status.in-error {
+	background-color: rgb(214, 28, 28);
+	color: #eeb;
+}
+
 .fw-start-btn.primary {
     background: #004400;
     border-color: #008800;
     color: #00ff00;
-    margin-top: 12px;
-    padding: 15px 5px;
+    margin-top: 8px;
+    padding: 13px 5px;
     font-size: 15px;
 }
 
@@ -101,14 +110,82 @@
     box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
 }
 
+/* Vypnutí hover efektu a změna vzhledu pro disabled stav */
+.fw-start-btn:disabled {
+    background: #222 !important;   /* Tmavé pozadí */
+    border-color: #444 !important;    /* Tmavý rám */
+    color: #666 !important;           /* Šedý text */
+    cursor: not-allowed;              /* Změna kurzoru na "přeškrtnutý kruh" */
+    box-shadow: none !important;      /* Odstranění záře */
+    opacity: 0.7;
+    filter: grayscale(1);             /* Pro jistotu odstraní veškerou zelenou */
+}
+
+/* Musíme výslovně zakázat i hover, aby při najetí tlačítko "neožilo" */
+.fw-start-btn:disabled:hover {
+    background: #222 !important;
+    color: #444 !important;
+    box-shadow: none !important;
+}
+
 /* Indikátory a Bootloader Info */
 .fw-indicators {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-top: 5px;
-    padding-top: 15px;
-    border-top: 1px solid #333;
+    margin-top: 8px;
+}
+
+/* Styling pro přepínač (Toggle Switch) */
+.toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    user-select: none;
+    padding: 5px 0;
+}
+
+.toggle-label {
+    font-size: 13px;
+    color: #aaa;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.toggle-switch {
+    width: 34px;
+    height: 18px;
+    background: #333;
+    border-radius: 10px;
+    position: relative;
+    transition: background 0.3s;
+    border: 1px solid #444;
+}
+
+.toggle-switch.on {
+    background: #0088ff; /* Modrá barva při zapnutí */
+    border-color: #00aaff;
+}
+
+.toggle-handle {
+    width: 14px;
+    height: 14px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+}
+
+.toggle-switch.on .toggle-handle {
+    transform: translateX(16px);
+}
+
+.toggle-container:hover .toggle-label {
+    color: #fff;
 }
 
 .indicator-item {
@@ -133,7 +210,7 @@
 .dot-off { background: #111; }
 
 .bl-info-block {
-    margin-top: 10px;
+    margin-top: 0px;
     padding: 10px;
     background: #000;
     border: 1px solid #222;
@@ -218,7 +295,7 @@
     font-weight: bold;
     text-align: center;
     font-size: 14px;
-    border: 1px solid #222;
+    border: 1px solid #333;
     width: 80px;
 }
 
@@ -260,7 +337,7 @@
 }
 
 /* Barevné kódování buněk Flash Mapy */
-.flash-cell.fw { background: #0042bc; border-color: #0044cc; }
+.flash-cell.fw { background: #0042bc; border-color: #0052dc; }
 .flash-cell.setup { background: #4d4d00; border-color: #808000; }
 .flash-cell.boot { background: #004d26; border-color: #008040; }
 .flash-cell.empty { background: #111; border-color: #222; color: #333; }
@@ -292,3 +369,4 @@
 .color-box.setup { background: #555500; }
 .color-box.boot { background: #004422; }
 .color-box.empty { background: #1a1a1a; border: 1px solid #333; }
+

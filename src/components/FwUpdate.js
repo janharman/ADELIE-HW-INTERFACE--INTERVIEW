@@ -1,15 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import FwFileLoader from './FwFileLoader';
 import FwFlashMap from './FwFlashMap';
-// import FwHexExplorer from './FwHexExplorer';
+import FwFlashing from './FwFlashing';
 import './FwUpdate.css';
 
 const FirmwareUpdate = ({ blInfo, productInfo, onCommand }) => {
     const [status, setStatus] = useState('Idle');
-    const [viewOffset, setViewOffset] = useState(0x1E000);
     const [fileStats, setFileStats] = useState({ fw: '--', date: '--', hw: '--', crc: '--', bl: '--', info: '--' });
-    
-    // Hlavní buffer zůstává zde, aby k němu měly přístup všechny komponenty
+	const [showMap, setShowMap] = useState(false);
+    const [flashProgress, setFlashProgress] = useState({ currentIdx: null, results: {}});
+	const [canFlash, setCanFlash] = useState(false);
     const firmwareBuffer = useRef(new Uint8Array(256 * 1024).fill(0xFF));
 
     // Callback, který zavolá FwFileLoader, až bude hotov s parsováním
@@ -18,12 +18,83 @@ const FirmwareUpdate = ({ blInfo, productInfo, onCommand }) => {
         setStatus('Ready');
     };
 
+	useEffect(() => {
+		setCanFlash((status === 'Ready') && (blInfo.sts & 1));
+		console.log('Status: '+status, '- Running in bootloader = '+(blInfo.sts & 1));
+	}, [status, blInfo])
+	
     const formatVersion = (ver) => (!ver || ver === 0) ? '--' : ver.toString(16).toUpperCase();
     const formatDate = (dateValue) => {
         if (!dateValue || dateValue === 0) return '--.--.----';
         const hex = dateValue.toString(16).padStart(8, '0');
         return `${hex.substring(6, 8)}.${hex.substring(4, 6)}.20${hex.substring(2, 4)}`;
     };
+
+	const flash = async () => {
+		if (status !== 'Ready') return;
+		
+		setStatus('Flashing');
+		const CHUNK_SIZE = 256;
+		const MAX_ADDRESS = 128 * 1024;
+		const buffer = firmwareBuffer.current;
+
+		// 1. Identifikace aktivních bloků (stejná logika jako v FwFlashing)
+		const activeChunks = [];
+		for (let i = 0; i < MAX_ADDRESS / CHUNK_SIZE; i++) {
+			const start = i * CHUNK_SIZE;
+			let hasData = false;
+			for (let j = 0; j < CHUNK_SIZE; j++) {
+				if (buffer[start + j] !== 0xFF) { hasData = true; break; }
+			}
+			if (hasData) activeChunks.push(i);
+		}
+
+		// Resetujeme progress bar
+		setFlashProgress({ currentIdx: null, results: {} });
+
+		// 2. Postupné odesílání
+		for (const chunkIdx of activeChunks) {
+			setFlashProgress(prev => ({ ...prev, currentIdx: chunkIdx }));
+			
+			const startAddr = chunkIdx * CHUNK_SIZE;
+			const dataChunk = buffer.slice(startAddr, startAddr + CHUNK_SIZE);
+
+			try {
+				// Zavoláme handleManualCommand z App.js
+				// Musíme ji upravit, aby přijímala i dataChunk!
+				const response = await onCommand(`Flash block ${chunkIdx}`, 0xBF, startAddr, dataChunk);
+
+				// Tady předpokládáme, že response[0] == 0xC1 (nebo 0xBF) znamená OK
+				if (response && response.length > 0) {
+					setFlashProgress(prev => ({
+						...prev,
+						// currentIdx: null,
+						results: { ...prev.results, [chunkIdx]: 'ok' }
+					}));
+				} else {
+					throw new Error("No response from device");
+				}
+			} catch (err) {
+				console.error(`Flash error at 0x${startAddr.toString(16)}:`, err);
+				setFlashProgress(prev => ({
+					...prev,
+					// currentIdx: null,
+					results: { ...prev.results, [chunkIdx]: 'er' }
+				}));
+				// setStatus('Error');
+				// return; // Zastavit při chybě
+			}
+		}
+
+		setStatus('Flash - Done');
+		// alert("Firmware update successful!");
+	};
+
+	const resetStatus = () => {
+		// if (status !== 'Error') return;
+		setStatus('Ready');
+		setFlashProgress({ currentIdx: null, results: {} });
+	}
 
     return (
         <div className="fw-update-content">
@@ -51,21 +122,29 @@ const FirmwareUpdate = ({ blInfo, productInfo, onCommand }) => {
                     </table>
                 </div>
 
-				{/* 2. Komponenta Memory Mapy */}
-				<FwFlashMap 
-					buffer={firmwareBuffer.current} 
-					onCellClick={setViewOffset} 
-				/>
+				<FwFlashing buffer={firmwareBuffer.current} progress={flashProgress} status={status}/>
+
+				{showMap && (<FwFlashMap buffer={firmwareBuffer.current} />)}
+
 			</div> {/* Main Content */}
 
 			{/* 2. Side panel for flash control */}
 			<div className="fw-control-sidebar">
 				<div className="fw-btn-group">
-					<button className="fw-cmd-btn mini" onClick={() => onCommand('Go To Bootloader', 0xB0, 0x1234ABCD)}>Go To Bootloader</button>
-					<button className="fw-cmd-btn mini" onClick={() => onCommand('Device Reset', 0xB0, 0x1234FFAA)}>Device Reset</button>
-					<button className="fw-start-btn primary mini" disabled={status !== 'Ready'}>FLASH FIRMWARE</button>
+					<button className="fw-cmd-btn" onClick={() => onCommand('Go To Bootloader', 0xB0, 0x1234ABCD)}>GO TO BOOTLOADER</button>
+					<button className="fw-cmd-btn" onClick={() => onCommand('Device Reset', 0xB0, 0x1234FFAA)}>DEVICE RESET</button>
+					<button className={`fw-cmd-btn status ${(status==='Error')?'in-error':''}`} onClick={() => resetStatus()}>{(status=='Error')?'ERROR - click to reset': status}</button>
+					<button className="fw-start-btn primary" disabled={!canFlash} onClick={() => flash()}>FLASH FIRMWARE</button>
 				</div>
 				<div className="fw-indicators">
+
+					<div className="toggle-container" onClick={() => setShowMap(!showMap)}>
+                        <div className={`toggle-switch ${showMap ? 'on' : 'off'}`}>
+                            <div className="toggle-handle"></div>
+                        </div>
+                        <span className="toggle-label">Show Flash Map</span>
+                    </div>
+
 					<div className="indicator-item">
 						<div className={`ind-dot ${(blInfo.ver) ? 'dot-on-green' : 'dot-off'}`}></div>
 						<span>Connected</span>
