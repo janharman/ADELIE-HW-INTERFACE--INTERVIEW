@@ -58,31 +58,36 @@ const FirmwareUpdate = ({ blInfo, productInfo, onCommand }) => {
 			
 			const startAddr = chunkIdx * CHUNK_SIZE;
 			const dataChunk = buffer.slice(startAddr, startAddr + CHUNK_SIZE);
+			let numOfTries = 0;
+			while (numOfTries < 5)
+			{
+				try {
+					// Zavoláme handleManualCommand z App.js
+					// Musíme ji upravit, aby přijímala i dataChunk!
+					const response = await onCommand(`Flash block ${chunkIdx}`, 0xBF, startAddr, dataChunk);
 
-			try {
-				// Zavoláme handleManualCommand z App.js
-				// Musíme ji upravit, aby přijímala i dataChunk!
-				const response = await onCommand(`Flash block ${chunkIdx}`, 0xBF, startAddr, dataChunk);
-
-				// Tady předpokládáme, že response[0] == 0xC1 (nebo 0xBF) znamená OK
-				if (response && response.length > 0) {
+					// Tady předpokládáme, že response[0] == 0xC1 (nebo 0xBF) znamená OK
+					if (response && response.length > 0) {
+						setFlashProgress(prev => ({
+							...prev,
+							// currentIdx: null,
+							results: { ...prev.results, [chunkIdx]: 'ok' }
+						}));
+						break;
+					} else {
+						throw new Error("No response from device");
+					}
+				} catch (err) {
+					console.error(`Flash error at 0x${startAddr.toString(16)}:`, err);
 					setFlashProgress(prev => ({
 						...prev,
 						// currentIdx: null,
-						results: { ...prev.results, [chunkIdx]: 'ok' }
+						results: { ...prev.results, [chunkIdx]: 'er' }
 					}));
-				} else {
-					throw new Error("No response from device");
+					numOfTries++;
+					// setStatus('Error');
+					// return; // Zastavit při chybě
 				}
-			} catch (err) {
-				console.error(`Flash error at 0x${startAddr.toString(16)}:`, err);
-				setFlashProgress(prev => ({
-					...prev,
-					// currentIdx: null,
-					results: { ...prev.results, [chunkIdx]: 'er' }
-				}));
-				// setStatus('Error');
-				// return; // Zastavit při chybě
 			}
 		}
 

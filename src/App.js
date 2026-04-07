@@ -22,6 +22,7 @@ function App() {
 	const [productInfo, setProductInfo] = useState({recver: 0, fw: 0, hw: 0, bl: 0,	info: '---'});
 	const [isConnected, setIsConnected] = useState(true);
 	const [bootloaderInfo, setBootloaderInfo] = useState({ver: 0, date: 0, sts: 0});
+	const silenceUntil = useRef(0);
 	
 	// Track handshake state and failed attempts
 	const fetchCommand = useRef(0);	// 0 = fetch Fw Info; 1 = fetch Runtime Data; 2 = fetch Bootloader Info
@@ -58,6 +59,7 @@ function App() {
 
 		const poll = async () => {
 			if (!serialRef.current || isProcessing.current) return;
+			if (silenceUntil.current > Date.now()) return;
 			
 			try {
 				isProcessing.current = true;
@@ -152,7 +154,7 @@ function App() {
 	}, [lastResponse]);
 
 	/**
-	 * Manual Command Handler
+	 * Manual Command Handler + Flashing
 	 */
 	const handleManualCommand = async (label, regType, mask, dataPayload=null) => {
 		if (!serialRef.current)
@@ -176,6 +178,7 @@ function App() {
 			case 0xBF: // FLASH FIRMWARE (1 kB)
 				// dataPayload je Uint8Array (1024 bytes) -> převedeme na 256 Uint32 prvků
 				const data32 = new Uint32Array(dataPayload.buffer);
+				data32[data32.length - 1] = 0xFFFFFFFF;
 				
 				outD = [
 					0x0000BF31 + (mask << 16), // Command + Register + RegNr + Cnt (Cnt = 0 == 256)
@@ -183,6 +186,7 @@ function App() {
 					0           // Místo pro výsledné CRC na konci
 				];
 				cnt = outD.length;
+				silenceUntil.current = Date.now() + 2000;
 				break;
 
 			default: // Standardní Control Command (např. 0x52)
