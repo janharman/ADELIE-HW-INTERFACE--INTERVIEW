@@ -175,13 +175,13 @@ function App() {
 				cnt = 3;
 				break;
 
-			case 0xBF: // FLASH FIRMWARE (1 kB)
-				// dataPayload je Uint8Array (1024 bytes) -> převedeme na 256 Uint32 prvků
+			case 0xBF: // FLASH FIRMWARE (256 Bytes)
+				// dataPayload je Uint8Array (256 bytes) -> převedeme na 64 Uint32 prvků
 				const data32 = new Uint32Array(dataPayload.buffer);
 				data32[data32.length - 1] = 0xFFFFFFFF;
 				
 				outD = [
-					0x0000BF31 + (mask << 16), // Command + Register + RegNr + Cnt (Cnt = 0 == 256)
+					0x0000BF31 + ((mask >> 4) << 16), // Command + Register + (Address >> 4)
 					...Array.from(data32), // Celý payload v uint32
 					0           // Místo pro výsledné CRC na konci
 				];

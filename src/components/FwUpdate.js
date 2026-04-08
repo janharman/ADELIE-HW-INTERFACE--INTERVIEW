@@ -64,7 +64,7 @@ const FirmwareUpdate = ({ blInfo, productInfo, onCommand }) => {
 				try {
 					// Zavoláme handleManualCommand z App.js
 					// Musíme ji upravit, aby přijímala i dataChunk!
-					const response = await onCommand(`Flash block ${chunkIdx}`, 0xBF, startAddr, dataChunk);
+					const response = await onCommand(`Flash block ${chunkIdx} addr: 0x${startAddr.toString(16)}`, 0xBF, startAddr, dataChunk);
 
 					// Tady předpokládáme, že response[0] == 0xC1 (nebo 0xBF) znamená OK
 					if (response && response.length > 0) {
