@@ -71,7 +71,7 @@ const FwFlashing = ({ buffer, progress, status }) => {
             <div className="flashing-footer">
                 <span className="addr-now">
                     {progress.currentIdx !== null 
-                        ? `Target: 0x${(progress.currentIdx * 1024).toString(16).toUpperCase()}` 
+                        ? `Target: 0x${(progress.currentIdx * 256).toString(16).toUpperCase()}` 
                         : 'Waiting for start...'}
                 </span>
             </div>

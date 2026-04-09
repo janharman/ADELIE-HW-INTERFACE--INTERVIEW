@@ -258,12 +258,12 @@
 .fw-comparison-table td {
     padding: 10px 12px;
     border-bottom: 1px solid #222;
-    color: #ccc;
 }
 
 .fw-comparison-table tr:hover { background: #111; }
 
 .val-file { color: #00ff00; font-family: monospace; }
+.info-text { white-space: pre-line; }
 .val-device { color: #0088ff; font-family: monospace; }
 .fw-comparison-table td:first-child { color: #777; font-weight: bold; width: 30%; }
 

@@ -23,7 +23,7 @@ const FirmwareUpdate = ({ blInfo, productInfo, onCommand }) => {
 		console.log('Status: '+status, '- Running in bootloader = '+(blInfo.sts & 1));
 	}, [status, blInfo])
 	
-    const formatVersion = (ver) => (!ver || ver === 0) ? '--' : ver.toString(16).toUpperCase();
+    const formatVersion = (ver) => (!ver || ver === 0) ? '--' : ver.toString();
     const formatDate = (dateValue) => {
         if (!dateValue || dateValue === 0) return '--.--.----';
         const hex = dateValue.toString(16).padStart(8, '0');
@@ -51,6 +51,9 @@ const FirmwareUpdate = ({ blInfo, productInfo, onCommand }) => {
 
 		// Resetujeme progress bar
 		setFlashProgress({ currentIdx: null, results: {} });
+
+		// Flash Start -> send number of chunks
+		const response = await onCommand(`Flash Init ${activeChunks.length}`, 0xBE, activeChunks.length, []);
 
 		// 2. Postupné odesílání
 		for (const chunkIdx of activeChunks) {
@@ -85,8 +88,11 @@ const FirmwareUpdate = ({ blInfo, productInfo, onCommand }) => {
 						results: { ...prev.results, [chunkIdx]: 'er' }
 					}));
 					numOfTries++;
-					// setStatus('Error');
-					// return; // Zastavit při chybě
+					if (numOfTries >= 5)
+					{
+						setStatus('Error');
+						return; // Stop at error
+					}
 				}
 			}
 		}
@@ -118,11 +124,10 @@ const FirmwareUpdate = ({ blInfo, productInfo, onCommand }) => {
                         </thead>
                         <tbody>
                             <tr><td>FW Version</td><td className="val-file">{fileStats.fw}</td><td className="val-device">{formatVersion(productInfo?.fw)}</td></tr>
-                            <tr><td>FW Date</td><td className="val-file">{fileStats.date}</td><td className="val-device">{formatDate(productInfo?.date)}</td></tr>
+                            <tr><td>FW Date</td><td className="val-file">{fileStats.date}</td><td className="val-device">{productInfo?.date}</td></tr>
                             <tr><td>Hardware Ver.</td><td className="val-file">{fileStats.hw}</td><td className="val-device">{formatVersion(productInfo?.hw)}</td></tr>
                             <tr><td>FW CRC</td><td className="val-file">{fileStats.crc}</td><td className="val-device">--</td></tr>
-                            <tr><td>Bootloader Ver.</td><td className="val-file">{fileStats.bl}</td><td className="val-device">{formatVersion(blInfo?.ver)}</td></tr>
-                            <tr><td>FW Info</td><td className="val-file">{fileStats.info}</td><td className="val-device">{productInfo?.info || '---'}</td></tr>
+                            <tr><td>FW Info</td><td className="val-file info-text">{fileStats.info}</td><td className="val-device info-text">{productInfo?.info || '---'}</td></tr>
                         </tbody>
                     </table>
                 </div>

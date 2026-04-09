@@ -134,12 +134,14 @@ function App() {
 						// je dobré ho očistit:
 						const buffer = new Uint8Array(lastResponse).buffer;
 						const view = new DataView(buffer);
+				        let di = text.indexOf('Date:');
 						let pinf = {
 							recver: view.getUint32(4, true),
 							fw: view.getUint32(8, true),
 							hw: view.getUint32(12, true),
 							bl: view.getUint32(16, true),
-							info: text.split('\0')[0]
+				            date: di > -1 ? text.slice(di + 6, di + 12) : '--',
+							info: text.split('\0')[0].replaceAll("\\n", "\n")
 						};
 						setProductInfo(pinf);
 						switchCommand();
@@ -175,13 +177,21 @@ function App() {
 				cnt = 3;
 				break;
 
+			case 0xBE: // FLASH info: number of Chunks
+				outD = [
+					0x0000BE31, // Command + Register + (Address >> 4)
+					mask,		// Number of chunks
+					0           // Místo pro výsledné CRC na konci
+				];
+				cnt = 3;
+				silenceUntil.current = Date.now() + 2000;
+				break;
+
 			case 0xBF: // FLASH FIRMWARE (256 Bytes)
 				// dataPayload je Uint8Array (256 bytes) -> převedeme na 64 Uint32 prvků
-				const data32 = new Uint32Array(dataPayload.buffer);
-				data32[data32.length - 1] = 0xFFFFFFFF;
-				
+				const data32 = new Uint32Array(dataPayload.buffer);				
 				outD = [
-					0x0000BF31 + ((mask >> 4) << 16), // Command + Register + (Address >> 4)
+					0x0000BF31 + ((mask >> 8) << 16), // Command + Register + (Address >> 4)
 					...Array.from(data32), // Celý payload v uint32
 					0           // Místo pro výsledné CRC na konci
 				];

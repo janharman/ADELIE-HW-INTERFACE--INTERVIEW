@@ -64,8 +64,8 @@ const FwFileLoader = ({ buffer, onParsed, onStatus }) => {
         let di = infoText.indexOf('Date:');
         
         onParsed({
-            fw: view.getUint32(FW_ADR_FW_INFO + 4, true).toString(16).toUpperCase(),
-            date: di > -1 ? infoText.slice(di + 5, di + 11) : '--',
+            fw: view.getUint32(FW_ADR_FW_INFO + 4, true).toString().toUpperCase(),
+            date: di > -1 ? infoText.slice(di + 6, di + 12) : '--',
             hw: view.getUint32(FW_ADR_FW_INFO + 8, true).toString(16).toUpperCase(),
             bl: '--',
             crc: (crc >>> 0).toString(16).padStart(8, '0').toUpperCase(),
@@ -77,11 +77,13 @@ const FwFileLoader = ({ buffer, onParsed, onStatus }) => {
         const file = e.target.files[0];
         if (!file) return;
         setFileName(file.name);
+		console.log(file.name);
         onStatus('Loading');
         const reader = new FileReader();
         reader.onload = (ev) => {
             parseHex(ev.target.result);
             runAnalysis();
+			e.target.value = '';
         };
         reader.readAsText(file);
     };
