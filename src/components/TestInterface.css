@@ -1,0 +1,200 @@
+/* TestInterface.css - Dark Theme */
+.test-interface-container.dark-theme {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.9rem;
+}
+
+.steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.step-row {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    border-radius: 4px;
+    min-height: 40px; /* Ensures consistent row height */
+}
+
+.step-row.active {
+    background: #2c3e50;
+    border-color: #3498db;
+}
+
+.step-row.done {
+    background: #1e271e;
+    border-color: #27ae60;
+    opacity: 0.7;
+}
+
+.step-number-col {
+    width: 25px;
+    font-weight: bold;
+    color: #666;
+}
+
+.step-status-icon {
+    width: 30px;
+    text-align: center;
+}
+
+.step-label-col {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.label-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Semaphore Visuals */
+.semaphore-visual {
+    display: flex;
+    gap: 6px;
+    margin-left: 20px;
+}
+
+.led-light {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #222;
+    border: 1px solid #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: #444;
+    transition: all 0.2s;
+}
+
+/* Active LED colors */
+.led-light.red.on    { background: #e74c3c; border-color: #ff7675; color: #fff; box-shadow: 0 0 8px #e74c3c; }
+.led-light.orange.on { background: #f39c12; border-color: #fbc531; color: #fff; box-shadow: 0 0 8px #f39c12; }
+.led-light.green.on  { background: #27ae60; border-color: #2ecc71; color: #fff; box-shadow: 0 0 8px #27ae60; }
+.led-light.blue.on   { background: #3498db; border-color: #74b9ff; color: #fff; box-shadow: 0 0 8px #3498db; }
+
+.step-action-col {
+    width: 70px;
+    text-align: right;
+}
+
+.compact-ok-btn {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.compact-ok-btn:hover { background: #2ecc71; }
+
+/* Opto Input Styles */
+.opto-visual {
+    display: flex;
+    gap: 16px;
+    margin-left: 20px;
+}
+
+.opto-dot {
+    padding: 4px 10px;
+    border-radius: 3px;
+    background: #333;
+    color: #666;
+    font-size: 15px;
+    font-weight: bold;
+    border: 1px solid #444;
+}
+
+.opto-dot.triggered {
+    background: #27ae60;
+    color: white;
+    border-color: #2ecc71;
+    box-shadow: 0 0 5px #27ae60;
+}
+
+/* Relay Styles */
+.relay-visual {
+    display: flex;
+    gap: 6px;
+    margin-left: 20px;
+}
+
+.relay-box {
+    padding: 2px 6px;
+    border: 1px solid #444;
+    background: #222;
+    color: #555;
+    font-size: 9px;
+    font-weight: bold;
+    border-radius: 2px;
+}
+
+.relay-box.on {
+    background: #d35400;
+    color: white;
+    border-color: #e67e22;
+    box-shadow: 0 0 8px #d35400;
+}
+
+.step-row.debug-jump {
+    cursor: pointer;
+}
+
+.step-row.debug-jump:hover {
+    background: #363636;
+}
+
+.step-row.active.debug-jump:hover {
+    background: #2c3e50;
+}
+
+/* Voltage Display Styles */
+.voltage-visual {
+    display: flex;
+    gap: 8px;
+    margin-left: 20px;
+	font-size: 14px;
+}
+
+.v-tag {
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: monospace;
+    background: #222;
+    border: 1px solid #444;
+    color: #888;
+    min-width: 80px;
+    text-align: center;
+}
+
+.v-tag.ok {
+    background: #1e271e;
+    color: #2ecc71;
+    border-color: #27ae60;
+    box-shadow: 0 0 5px rgba(46, 204, 113, 0.3);
+}
+
+.v-tag.fail {
+    background: #2d1e1e;
+    color: #e74c3c;
+    border-color: #c0392b;
+}

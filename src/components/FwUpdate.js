@@ -123,9 +123,9 @@ const FirmwareUpdate = ({ blInfo, productInfo, onCommand }) => {
                             <tr><th>Property</th><th>Firmware File</th><th>Device</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>FW Version</td><td className="val-file">{fileStats.fw}</td><td className="val-device">{formatVersion(productInfo?.fw)}</td></tr>
+                            <tr><td>FW Version</td><td className="val-file">{fileStats.fw}</td><td className="val-device">{productInfo?.fw}</td></tr>
                             <tr><td>FW Date</td><td className="val-file">{fileStats.date}</td><td className="val-device">{productInfo?.date}</td></tr>
-                            <tr><td>Hardware Ver.</td><td className="val-file">{fileStats.hw}</td><td className="val-device">{formatVersion(productInfo?.hw)}</td></tr>
+                            <tr><td>Hardware Ver.</td><td className="val-file">{fileStats.hw}</td><td className="val-device">{productInfo?.hw}</td></tr>
                             <tr><td>FW CRC</td><td className="val-file">{fileStats.crc}</td><td className="val-device">--</td></tr>
                             <tr><td>FW Info</td><td className="val-file info-text">{fileStats.info}</td><td className="val-device info-text">{productInfo?.info || '---'}</td></tr>
                         </tbody>

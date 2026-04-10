@@ -262,9 +262,9 @@
 
 .fw-comparison-table tr:hover { background: #111; }
 
-.val-file { color: #00ff00; font-family: monospace; }
+.val-file { color: #35ed35; font-family: monospace; }
 .info-text { white-space: pre-line; }
-.val-device { color: #0088ff; font-family: monospace; }
+.val-device { color: #6ebbff; font-family: monospace; }
 .fw-comparison-table td:first-child { color: #777; font-weight: bold; width: 30%; }
 
 /* Flash Memory Map */
