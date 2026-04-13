@@ -115,6 +115,11 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 			clearInterval(semaphoreTimer.current);
 			semaphoreTimer.current = null;
 		}
+		if ((currentStep < 12) && (currentStep > 14) && terminatingResTimer.current)
+		{
+			clearInterval(terminatingResTimer.current);
+			terminatingResTimer.current = null;
+		}
 		// switch according to STEP
         switch (currentStep) 
 		{
@@ -205,16 +210,13 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 				if (terminatingResTimer.current) return;
 				const runTermRes = () => {
 					setTermRes((prev) => {
-						const next = (prev + 1) % 4;
-						const masks = [0x0001, 0x0002, 0x0004, 0x0008];
-						onCommand(`Relay ${next + 1}`, 0x52, masks[next], [(~masks[next]) & 0x000F]);
-						return next;
+						const tr = (!prev)?(1 << (currentStep - 12)): 0;
+						onCommand(`Terminating Resistor Port #1 - ${tr?'ON':'OFF'}`, 0x53, tr);
+						return tr;
 					});
 				};
-				// Hned první sepnutí
 				runTermRes();
-				// A nastavení opakování
-				terminatingResTimer.current = setInterval(runTermRes, 1500);				
+				terminatingResTimer.current = setInterval(runTermRes, 2000);				
 				break;
 		}
     }, [currentStep, runtimeData, isConnected]);

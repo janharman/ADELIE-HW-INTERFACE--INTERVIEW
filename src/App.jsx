@@ -154,7 +154,6 @@ function App() {
 			try {
 				console.log(label);
 				isProcessing.current = true;
-
 				let outD = [];
 
 				switch (regType)
@@ -167,6 +166,9 @@ function App() {
 						outD[1] = mask;
 						outD[2] = dataPayload[0];
 					}
+					break;
+				case 0x53:	// Operational Data
+					outD = [0x01055331, mask, 0];
 					break;
 				case 0xB0:	// Reset / Bootloader
 					outD = [0x0100B031, mask, 0]; // 3. prvek je místo pro CRC
