@@ -20,8 +20,8 @@
     padding: 6px 12px;
     background: #2d2d2d;
     border: 1px solid #3d3d3d;
-    border-radius: 4px;
-    min-height: 40px; /* Ensures consistent row height */
+    border-radius: 5px;
+    min-height: 32px; /* Ensures consistent row height */
 }
 
 .step-row.active {
@@ -67,8 +67,8 @@
 }
 
 .led-light {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background: #222;
     border: 1px solid #444;
@@ -173,7 +173,15 @@
 	font-size: 14px;
 }
 
+.voltage-visual div span:first-child {
+	display: inline-block;
+	min-width: 80px;
+	text-align: right;
+	margin-right: 7px;
+}
+
 .v-tag {
+	display: inline-block;
     padding: 2px 8px;
     border-radius: 3px;
     font-size: 18px;
@@ -182,7 +190,7 @@
     background: #222;
     border: 1px solid #444;
     color: #888;
-    min-width: 80px;
+    width: 80px;
     text-align: center;
 }
 

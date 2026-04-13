@@ -7,21 +7,13 @@ import './TestInterface.css';
  */
 function TestInterface({ isConnected, onCommand, runtimeData }) {
     const [currentStep, setCurrentStep] = useState(0);
-    
-    // Step 2: Semaphore state
     const [semaphoreIndex, setSemaphoreIndex] = useState(0);
     const semaphoreTimer = useRef(null);
-
-    // Step 3: Opto Inputs tracking
-    // We use a bitmask (0b0000) to remember which inputs were triggered
     const [optoHistory, setOptoHistory] = useState(0);
-    
-    // Step 4: Relays state
     const [relayIndex, setRelayIndex] = useState(0);
     const relayTimer = useRef(null);
-	const branchTimer = useRef(null);
-
-	// Step 5: On-Board Voltages
+	const terminatingResTimer = useRef(null);
+	const [termRes, setTermRes] = useState(0);
 	const [rtd, setRtd] = useState({
 		Pwr24V: 0,
 		Pwr5V: 0,
@@ -52,6 +44,7 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 		{ id: 10, label: 'Modbus Communication Port #1', type: 'manual' },
 		{ id: 11, label: 'Modbus Communication Port #2', type: 'manual' },
 		{ id: 12, label: 'Modbus Communication Port #3', type: 'manual' },
+		{ id: 13, label: 'Terminating Resistor Port #1', type: 'manual' },
     ];
 
     const turnOffAll = () => {
@@ -61,9 +54,6 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 
 	// DEBUG: Jump to step
     const jumpToStep = (index) => {
-        // Cleanup before jumping
-        if (semaphoreTimer.current) clearInterval(semaphoreTimer.current);
-        if (relayTimer.current) clearInterval(relayTimer.current);
         turnOffAll();
         setCurrentStep(index);
     };
@@ -111,44 +101,48 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 		});
 	}, [runtimeData, currentStep]);
 
-	// STEP 1: Auto-advance on connection
-    useEffect(() => {
-        if (currentStep === 0 && isConnected) {
-            const timer = setTimeout(() => setCurrentStep(1), 500);
-            return () => clearTimeout(timer);
-        }
-    }, [isConnected, currentStep]);
-
-    // STEP 2: Semaphore cycling
-    useEffect(() => {
-        if (currentStep === 1 && isConnected) {
-            semaphoreTimer.current = setInterval(() => {
-                setSemaphoreIndex((prev) => {
-                    const next = (prev + 1) % 4;
-                    const masks = [0x010000, 0x020000, 0x040000, 0x080000];
-                    onCommand(`Semaphore LED ${next + 1}`, 0x52, masks[next], [(~masks[next]) & 0xF0000]);
-                    return next;
-                });
-            }, 800);
-        } else {
-            if (semaphoreTimer.current) clearInterval(semaphoreTimer.current);
-        }
-        return () => { if (semaphoreTimer.current) clearInterval(semaphoreTimer.current); };
-    }, [currentStep, isConnected]);
-
     // STEPs Handling
     useEffect(() => {
 		if (!(runtimeData && runtimeData.length >= 12)) return;
 		// destroy timers
-		if (currentStep !== 3) if (relayTimer.current)
+		if ((currentStep !== 3) && (relayTimer.current))
 		{
 			clearInterval(relayTimer.current);
 			relayTimer.current = null;
 		}
+		if ((currentStep !== 1) && (semaphoreTimer.current))
+		{
+			clearInterval(semaphoreTimer.current);
+			semaphoreTimer.current = null;
+		}
 		// switch according to STEP
         switch (currentStep) 
 		{
-			case 2: // ----------------------------- OPTO INPUTS
+			case 0: 	// ----------------------------- Interface Connection
+				if (isConnected)
+					setTimeout(() => setCurrentStep(1), 500);
+				break;
+			case 1: 	// ----------------------------- Semaphore Cycling
+				if (semaphoreTimer.current) return;
+				if (isConnected) {
+					const runSemaphore = () => {
+						setSemaphoreIndex((prev) => {
+							const next = (prev + 1) % 4;
+							const masks = [0x010000, 0x020000, 0x040000, 0x080000];
+							onCommand(`Semaphore LED ${next + 1}`, 0x52, masks[next], [(~masks[next]) & 0xF0000]);
+							return next;
+						});
+					};
+					runSemaphore();
+					semaphoreTimer.current = setInterval(runSemaphore, 850);				
+				}
+				else if (semaphoreTimer.current)
+				{
+					clearInterval(semaphoreTimer.current);
+					semaphoreTimer.current = null;
+				}
+				break;
+			case 2: 	// ----------------------------- OPTO INPUTS
 				const currentInputs = runtimeData[4] & 0x0F;            
 				setOptoHistory(prev => {
 					const newHistory = prev | currentInputs;
@@ -159,7 +153,7 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 					return newHistory;
 				});
 				break;
-			case 3: // ----------------------------- Relay Cycling
+			case 3: 	// ----------------------------- Relay Cycling
 				if (relayTimer.current) return;
 				console.log("Starting new Relay Timer");						
 				// Definujeme funkci pro jeden krok
@@ -176,11 +170,11 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 				// A nastavení opakování
 				relayTimer.current = setInterval(runNextRelay, 650);				
 				break;
-			case 4:	// ----------------------------- On-Board Voltages
+			case 4:		// ----------------------------- On-Board Voltages
 				if ((rtd.statusOk & 0x70000) == 0x70000)
 					setTimeout(() => setCurrentStep(prev => (prev === 4 ? 5 : prev)), 1200);
 				break;
-			case 5: // ----------------------------- Silent Current Measurement
+			case 5: 	// ----------------------------- Silent Current Measurement
 				const currentLimit = 10;
 				if ((rtd.CurMinB1 < currentLimit) && (rtd.CurMinB2 < currentLimit) && (rtd.CurMinB3 < currentLimit)) {
 					// Pokud jsou proudy v klidu OK, můžeme jít na další krok
@@ -204,6 +198,23 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 				break;
 			case 11:	// ----------------------------- Modbus Communication - Port #3
 				onCommand('Branch #3', 0x52, 0x400, [0x300]);
+				break;
+			case 12:	// ----------------------------- Terminating Resistor - Port #1
+			case 13:	// ----------------------------- Terminating Resistor - Port #2
+			case 14:	// ----------------------------- Terminating Resistor - Port #3
+				if (terminatingResTimer.current) return;
+				const runTermRes = () => {
+					setTermRes((prev) => {
+						const next = (prev + 1) % 4;
+						const masks = [0x0001, 0x0002, 0x0004, 0x0008];
+						onCommand(`Relay ${next + 1}`, 0x52, masks[next], [(~masks[next]) & 0x000F]);
+						return next;
+					});
+				};
+				// Hned první sepnutí
+				runTermRes();
+				// A nastavení opakování
+				terminatingResTimer.current = setInterval(runTermRes, 1500);				
 				break;
 		}
     }, [currentStep, runtimeData, isConnected]);
@@ -271,42 +282,49 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 								{/* Step 5: On-Board Voltages */}
                                 {step.id === 5 && (
                                     <div className="voltage-visual">
-                                        <div><span>24VDC: </span><span className={`v-tag ${(rtd.statusOk&0x10000) ? 'ok' : 'fail'}`}>{rtd.Pwr24V} V</span></div>
-                                        <div><span>5VDC:  </span><span className={`v-tag ${(rtd.statusOk&0x20000) ? 'ok' : 'fail'}`}>{rtd.Pwr5V} V</span></div>
-                                        <div><span>19VDC: </span><span className={`v-tag ${(rtd.statusOk&0x40000) ? 'ok' : 'fail'}`}>{rtd.Pwr19V} V</span></div>
+                                        <div><span>24VDC </span><span className={`v-tag ${(rtd.statusOk&0x10000) ? 'ok' : 'fail'}`}>{rtd.Pwr24V} V</span></div>
+                                        <div><span>5VDC  </span><span className={`v-tag ${(rtd.statusOk&0x20000) ? 'ok' : 'fail'}`}>{rtd.Pwr5V} V</span></div>
+                                        <div><span>19VDC </span><span className={`v-tag ${(rtd.statusOk&0x40000) ? 'ok' : 'fail'}`}>{rtd.Pwr19V} V</span></div>
                                     </div>
                                 )}
 
 								{/* Step 6: Silent Current Measurement */}
                                 {step.id === 6 && (
                                     <div className="voltage-visual">
-                                        <div><span>Branch #1:</span><span className={`v-tag ${(rtd.CurMinB1 < 10) ? 'ok' : 'fail'}`}>{rtd.CurMinB1} mA</span></div>
-                                        <div><span>Branch #2:</span><span className={`v-tag ${(rtd.CurMinB2 < 10) ? 'ok' : 'fail'}`}>{rtd.CurMinB2} mA</span></div>
-                                        <div><span>Branch #3:</span><span className={`v-tag ${(rtd.CurMinB3 < 10) ? 'ok' : 'fail'}`}>{rtd.CurMinB3} mA</span></div>
+                                        <div><span>Branch #1</span><span className={`v-tag ${(rtd.CurMinB1 < 10) ? 'ok' : 'fail'}`}>{rtd.CurMinB1} mA</span></div>
+                                        <div><span>Branch #2</span><span className={`v-tag ${(rtd.CurMinB2 < 10) ? 'ok' : 'fail'}`}>{rtd.CurMinB2} mA</span></div>
+                                        <div><span>Branch #3</span><span className={`v-tag ${(rtd.CurMinB3 < 10) ? 'ok' : 'fail'}`}>{rtd.CurMinB3} mA</span></div>
                                     </div>
                                 )}
 
 								{/* Step 7: High Current Measurement - Branch #1 */}
                                 {step.id === 7 && (
                                     <div className="voltage-visual">
-                                        <div><span>Volatage:</span><span className={`v-tag ${(rtd.VoltOnB1 > 22) ? 'ok' : 'fail'}`}>{rtd.VoltOnB1.toFixed(2)} V</span></div>
-                                        <div><span>Current:</span><span className={`v-tag ${(rtd.CurHiB1 > 3000) ? 'ok' : 'fail'}`}>{rtd.CurHiB1} mA</span></div>
+                                        <div><span>Volatage</span><span className={`v-tag ${(rtd.VoltOnB1 > 22) ? 'ok' : 'fail'}`}>{rtd.VoltOnB1.toFixed(2)} V</span></div>
+                                        <div><span>Current</span><span className={`v-tag ${(rtd.CurHiB1 > 3000) ? 'ok' : 'fail'}`}>{rtd.CurHiB1} mA</span></div>
                                     </div>
                                 )}
 
 								{/* Step 8: High Current Measurement - Branch #2 */}
                                 {step.id === 8 && (
                                     <div className="voltage-visual">
-                                        <div><span>Volatage:</span><span className={`v-tag ${(rtd.VoltOnB2 > 22) ? 'ok' : 'fail'}`}>{rtd.VoltOnB2.toFixed(2)} V</span></div>
-                                        <div><span>Current:</span><span className={`v-tag ${(rtd.CurHiB2 > 3000) ? 'ok' : 'fail'}`}>{rtd.CurHiB2} mA</span></div>
+                                        <div><span>Volatage</span><span className={`v-tag ${(rtd.VoltOnB2 > 22) ? 'ok' : 'fail'}`}>{rtd.VoltOnB2.toFixed(2)} V</span></div>
+                                        <div><span>Current</span><span className={`v-tag ${(rtd.CurHiB2 > 3000) ? 'ok' : 'fail'}`}>{rtd.CurHiB2} mA</span></div>
                                     </div>
                                 )}
 
 								{/* Step 8: High Current Measurement - Branch #3 */}
                                 {step.id === 9 && (
                                     <div className="voltage-visual">
-                                        <div><span>Volatage:</span><span className={`v-tag ${(rtd.VoltOnB3 > 22) ? 'ok' : 'fail'}`}>{rtd.VoltOnB3.toFixed(2)} V</span></div>
-                                        <div><span>Current:</span><span className={`v-tag ${(rtd.CurHiB3 > 3000) ? 'ok' : 'fail'}`}>{rtd.CurHiB3} mA</span></div>
+                                        <div><span>Volatage</span><span className={`v-tag ${(rtd.VoltOnB3 > 22) ? 'ok' : 'fail'}`}>{rtd.VoltOnB3.toFixed(2)} V</span></div>
+                                        <div><span>Current</span><span className={`v-tag ${(rtd.CurHiB3 > 3000) ? 'ok' : 'fail'}`}>{rtd.CurHiB3} mA</span></div>
+                                    </div>
+                                )}
+
+								{/* Step 13: Terminating Resistor - Port #1 */}
+                                {step.id === 13 && (
+                                    <div className="voltage-visual">
+                                        <div className={`led-light ${termRes & 1 ? 'on' : ''}`}></div>
                                     </div>
                                 )}
                             </div>
