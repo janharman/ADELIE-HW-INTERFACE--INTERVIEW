@@ -1,70 +1,47 @@
-# Getting Started with Create React App
+# Adélie Interface - Diagnostic Tool 🚀
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Tento nástroj slouží pro oživování, testování a update firmware hardware **greenBOX (Adélie)**.
+Projekt byl migrován z CRA na **Vite** pro vyšší rychlost a stabilitu.
 
-## Available Scripts
+## 🛠️ Vývojové příkazy
 
-In the project directory, you can run:
+V kořenovém adresáři projektu můžeš spouštět:
 
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### `npm run dev`
+Spustí aplikaci ve vývojovém režimu na [http://localhost:5173](http://localhost:5173).  
+Stránka se automaticky obnoví při uložení změn v kódu.
 
 ### `npm run build`
+Zkompiluje aplikaci pro produkční použití do složky `dist` (výchozí).  
+Výsledkem je optimalizovaný balíček připravený k nahrání na webový server.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 📂 Nastavení cílové složky (Build Folder)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Pokud potřebuješ, aby se zkompilovaná aplikace neukládala do složky `dist`, ale jinam (např. do `build` nebo `public_html`), uprav soubor **`vite.config.js`** v kořenovém adresáři:
 
-### `npm run eject`
+```javascript
+// vite.config.js
+import { defineConfig } from 'vite'
+import react from '@vitejs/react-swc'
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    outDir: 'moje_cilova_slozka', // ZDE změníš název složky
+  },
+})
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 📂 Nastavení cílové složky (Build Folder)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Nastavení složky na webu.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+export default defineConfig({
+  // Base musí začínat i končit lomítkem. 
+  // Odpovídá názvu složky na vašem webovém serveru.
+  base: '/Adelie-interface-test/', 
+  
+  plugins: [react()],
+  // ... zbytek konfigurace
+})
