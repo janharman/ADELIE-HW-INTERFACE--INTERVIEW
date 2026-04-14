@@ -181,6 +181,10 @@
 	margin-right: 7px;
 }
 
+.voltage-visual.pdport div span:first-child {
+	min-width: initial;
+}
+
 .v-tag {
 	display: inline-block;
     padding: 2px 8px;
@@ -193,6 +197,10 @@
     color: #888;
     width: 80px;
     text-align: center;
+}
+
+.v-tag.pdp {
+	width: initial;
 }
 
 .v-tag.ok {

@@ -17,6 +17,7 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 	const commandDelay = useRef(0);
 	const [serialNumber, setSerialNumber] = useState('');
 	const [comment, setComment] = useState('');
+	const prevStep = useRef(-1);
 	const [rtd, setRtd] = useState({
 		Pwr24V: 0,
 		Pwr5V: 0,
@@ -34,8 +35,10 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 		FanRotation: 0,
 		PowerOK: 0,
 		PD_5V: 0,
+		PD_9V: 0,
 		PD_12V: 0,
-		PD_19V: 0,
+		PD_15V: 0,
+		PD_20V: 0,
 		PD_ALL_OK: 0,
 	});
 
@@ -129,13 +132,21 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 					updated.PD_5V = volt;
 					updated.PD_ALL_OK |= 1;
 				}
-				if ((volt > 11) && (volt < 13)) {				// PD for 12V
-					updated.PD_12V = volt;
+				if ((volt > 8.5) && (volt < 9.5)) {				// PD for 9V
+					updated.PD_9V = volt;
 					updated.PD_ALL_OK |= 2;
 				}
-				if ((volt > 18) && (volt < 20)) {				// PD for 19V
-					updated.PD_19V = volt;
+				if ((volt > 11) && (volt < 13)) {				// PD for 12V
+					updated.PD_12V = volt;
 					updated.PD_ALL_OK |= 4;
+				}
+				if ((volt > 14) && (volt < 16)) {				// PD for 15V
+					updated.PD_15V = volt;
+					updated.PD_ALL_OK |= 8;
+				}
+				if ((volt > 19) && (volt < 21)) {				// PD for 20V
+					updated.PD_20V = volt;
+					updated.PD_ALL_OK |= 16;
 				}
 			}
 
@@ -261,7 +272,9 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 			case 12:	// ----------------------------- Terminating Resistor - Port #1
 			case 13:	// ----------------------------- Terminating Resistor - Port #2
 			case 14:	// ----------------------------- Terminating Resistor - Port #3
-				if (terminatingResTimer.current) return;
+				if ((prevStep.current === currentStep) && (terminatingResTimer.current)) return;
+				if (terminatingResTimer.current) clearInterval(terminatingResTimer.current);
+				prevStep.current = currentStep;
 				const runTermRes = () => {
 					setTermRes((prev) => {
 						const tr = (prev === 0)?(1 << (currentStep - 12)): 0;
@@ -395,7 +408,7 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 								{/* Step 13, 14, 15: Terminating Resistor - Port #1 */}
                                 {(step.id === 13 || step.id === 14 || step.id === 15) && isActive && (
                                     <div className="voltage-visual">
-                                        <div className={`led-light aqua ${termRes & 1 ? 'on' : ''}`}>{termRes ? 'ON' : 'OFF'}</div>
+                                        <div className={`led-light aqua ${termRes & (1 << (step.id-13)) ? 'on' : ''}`}>{termRes ? 'ON' : 'OFF'}</div>
                                     </div>
                                 )}
 
@@ -418,10 +431,12 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 
 								{/* Step 18: Power Delivery Port values 5 12 19 V */}
                                 {step.id === 18 && (
-                                    <div className="voltage-visual">
-                                        <div><span>5V</span><span className={`v-tag ${(rtd.PD_ALL_OK & 1) ? 'ok' : 'fail'}`}>{rtd.PD_5V} V</span></div>
-                                        <div><span>12V</span><span className={`v-tag ${(rtd.PD_ALL_OK & 2) ? 'ok' : 'fail'}`}>{rtd.PD_12V} V</span></div>
-                                        <div><span>19V</span><span className={`v-tag ${(rtd.PD_ALL_OK & 4) ? 'ok' : 'fail'}`}>{rtd.PD_19V} V</span></div>
+                                    <div className="voltage-visual pdport">
+                                        <div><span>5V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 1) ? 'ok' : 'fail'}`}>{rtd.PD_5V} V</span></div>
+                                        <div><span>9V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 2) ? 'ok' : 'fail'}`}>{rtd.PD_9V} V</span></div>
+                                        <div><span>12V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 4) ? 'ok' : 'fail'}`}>{rtd.PD_12V} V</span></div>
+                                        <div><span>15V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 8) ? 'ok' : 'fail'}`}>{rtd.PD_15V} V</span></div>
+                                        <div><span>20V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 16) ? 'ok' : 'fail'}`}>{rtd.PD_20V} V</span></div>
                                     </div>
                                 )}
 
