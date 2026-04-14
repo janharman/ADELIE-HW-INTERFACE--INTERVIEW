@@ -384,7 +384,7 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 								{/* Step 7: High Current Measurement - Branch #1 */}
                                 {step.id === 7 && (
                                     <div className="voltage-visual">
-                                        <div><span>Volatage</span><span className={`v-tag ${(rtd.VoltOnB1 > 22) ? 'ok' : 'fail'}`}>{rtd.VoltOnB1.toFixed(2)} V</span></div>
+                                        <div><span>Voltage</span><span className={`v-tag ${(rtd.VoltOnB1 > 22) ? 'ok' : 'fail'}`}>{rtd.VoltOnB1.toFixed(2)} V</span></div>
                                         <div><span>Current</span><span className={`v-tag ${(rtd.CurHiB1 > 3000) ? 'ok' : 'fail'}`}>{rtd.CurHiB1} mA</span></div>
                                     </div>
                                 )}
@@ -392,7 +392,7 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 								{/* Step 8: High Current Measurement - Branch #2 */}
                                 {step.id === 8 && (
                                     <div className="voltage-visual">
-                                        <div><span>Volatage</span><span className={`v-tag ${(rtd.VoltOnB2 > 22) ? 'ok' : 'fail'}`}>{rtd.VoltOnB2.toFixed(2)} V</span></div>
+                                        <div><span>Voltage</span><span className={`v-tag ${(rtd.VoltOnB2 > 22) ? 'ok' : 'fail'}`}>{rtd.VoltOnB2.toFixed(2)} V</span></div>
                                         <div><span>Current</span><span className={`v-tag ${(rtd.CurHiB2 > 3000) ? 'ok' : 'fail'}`}>{rtd.CurHiB2} mA</span></div>
                                     </div>
                                 )}
@@ -400,7 +400,7 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 								{/* Step 8: High Current Measurement - Branch #3 */}
                                 {step.id === 9 && (
                                     <div className="voltage-visual">
-                                        <div><span>Volatage</span><span className={`v-tag ${(rtd.VoltOnB3 > 22) ? 'ok' : 'fail'}`}>{rtd.VoltOnB3.toFixed(2)} V</span></div>
+                                        <div><span>Voltage</span><span className={`v-tag ${(rtd.VoltOnB3 > 22) ? 'ok' : 'fail'}`}>{rtd.VoltOnB3.toFixed(2)} V</span></div>
                                         <div><span>Current</span><span className={`v-tag ${(rtd.CurHiB3 > 3000) ? 'ok' : 'fail'}`}>{rtd.CurHiB3} mA</span></div>
                                     </div>
                                 )}
