@@ -297,7 +297,7 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 					setTimeout(() => setCurrentStep(prev => (prev === 16 ? 17 : prev)), 1200);
 				break;
 			case 17:	// ----------------------------- PD Port 5 12 19 V
-				if ((rtd.PD_ALL_OK & 0x0003) === 0x003)
+				if ((rtd.PD_ALL_OK & 0x0005) === 0x005)
 					setTimeout(() => setCurrentStep(prev => (prev === 17 ? 18 : prev)), 1200);
 				break;
 		}
@@ -432,11 +432,11 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 								{/* Step 18: Power Delivery Port values 5 12 19 V */}
                                 {step.id === 18 && (
                                     <div className="voltage-visual pdport">
-                                        <div><span>5V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 1) ? 'ok' : 'fail'}`}>{rtd.PD_5V} V</span></div>
-                                        <div><span>9V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 2) ? 'ok' : 'fail'}`}>{rtd.PD_9V} V</span></div>
-                                        <div><span>12V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 4) ? 'ok' : 'fail'}`}>{rtd.PD_12V} V</span></div>
-                                        <div><span>15V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 8) ? 'ok' : 'fail'}`}>{rtd.PD_15V} V</span></div>
-                                        <div><span>20V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 16) ? 'ok' : 'fail'}`}>{rtd.PD_20V} V</span></div>
+                                        <div><span>5V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 1) ? 'ok' : 'fail'}`}>{rtd.PD_5V.toFixed(1)} V</span></div>
+                                        <div><span>9V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 2) ? 'ok' : 'fail'}`}>{rtd.PD_9V.toFixed(1)} V</span></div>
+                                        <div><span>12V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 4) ? 'ok' : 'fail'}`}>{rtd.PD_12V.toFixed(1)} V</span></div>
+                                        <div><span>15V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 8) ? 'ok' : 'fail'}`}>{rtd.PD_15V.toFixed(1)} V</span></div>
+                                        <div><span>20V</span><span className={`v-tag pdp ${(rtd.PD_ALL_OK & 16) ? 'ok' : 'fail'}`}>{rtd.PD_20V.toFixed(1)} V</span></div>
                                     </div>
                                 )}
 
