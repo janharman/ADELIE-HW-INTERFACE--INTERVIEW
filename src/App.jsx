@@ -150,97 +150,101 @@ function App() {
 		// }
 
 		// "Nabalíme" nový příkaz na konec stávající fronty
-    	commandQueue.current = commandQueue.current.then(async () => {
-			try {
-				console.log(label);
-				isProcessing.current = true;
-				let outD = [];
+    	const currentPromise = commandQueue.current
+			.catch(() => {})
+			.then(async () => {
+				try {
+					console.log(label);
+					isProcessing.current = true;
+					let outD = [];
 
-				switch (regType)
-				{
-				case 0x52:	// Control Command
-					outD = [0x02005231, 0, 0, 0];
-					if (!dataPayload)
-						if (mask & statusON) outD[2] = mask; else outD[1] = mask;
-					else {
-						outD[1] = mask;
-						outD[2] = dataPayload[0];
+					switch (regType)
+					{
+					case 0x52:	// Control Command
+						outD = [0x02005231, 0, 0, 0];
+						if (!dataPayload)
+							if (mask & statusON) outD[2] = mask; else outD[1] = mask;
+						else {
+							outD[1] = mask;
+							outD[2] = dataPayload[0];
+						}
+						break;
+					case 0x53:	// Operational Data
+						outD = [0x01055331, mask, 0];
+						break;
+					case 0xB0:	// Reset / Bootloader
+						outD = [0x0100B031, mask, 0]; // 3. prvek je místo pro CRC
+						break;
+
+					case 0xB1:	// Bootloader Info
+						outD = [0x0000B136, 0];
+						break;
+
+					case 0xBE: // FLASH info: number of Chunks
+						outD = [
+							0x0000BE31, // Command + Register + (Address >> 4)
+							mask,		// Number of chunks
+							0,			// Reserve - set to zero
+							0           // Místo pro výsledné CRC na konci
+						];
+						silenceUntil.current = Date.now() + 2000;
+						break;
+
+					case 0xBF: // FLASH FIRMWARE (256 Bytes)
+						// dataPayload je Uint8Array (256 bytes) -> převedeme na 64 Uint32 prvků
+						const data32 = new Uint32Array(dataPayload.buffer);				
+						outD = [
+							0x0000BF31 + ((mask >> 8) << 16), // Command + Register + (Address >> 4)
+							...Array.from(data32), // Celý payload v uint32
+							0           // Místo pro výsledné CRC na konci
+						];
+						silenceUntil.current = Date.now() + 2000;
+						break;
+					
+					case 0xFF: // Firmware Data - info
+						outD = [0x0000FF36, 0];
+						break;
+
+					default: // Runtime Data
+						outD = [0x00000036, 0];
+						break;
 					}
-					break;
-				case 0x53:	// Operational Data
-					outD = [0x01055331, mask, 0];
-					break;
-				case 0xB0:	// Reset / Bootloader
-					outD = [0x0100B031, mask, 0]; // 3. prvek je místo pro CRC
-					break;
+					let cnt = outD.length;
 
-				case 0xB1:	// Bootloader Info
-					outD = [0x0000B136, 0];
-					break;
+					// 2. Výpočet CRC z celého pole (vše kromě posledního prvku)
+					let crc = 0;
+					for (let d = 0; d < (cnt - 1); d++) {
+						crc ^= outD[d];
+					}
+					outD[cnt - 1] = crc; // Uložení CRC na konec pole
 
-				case 0xBE: // FLASH info: number of Chunks
-					outD = [
-						0x0000BE31, // Command + Register + (Address >> 4)
-						mask,		// Number of chunks
-						0,			// Reserve - set to zero
-						0           // Místo pro výsledné CRC na konci
-					];
-					silenceUntil.current = Date.now() + 2000;
-					break;
+					// 3. Rozházení 32-bit uintů do 8-bit hexArray (Little Endian)
+					let hexArray = [];
+					for (let d = 0; d < cnt; d++) {
+						let x = outD[d];
+						hexArray.push(x & 0xFF);
+						hexArray.push((x >> 8) & 0xFF);
+						hexArray.push((x >> 16) & 0xFF);
+						hexArray.push((x >> 24) & 0xFF);
+					}
 
-				case 0xBF: // FLASH FIRMWARE (256 Bytes)
-					// dataPayload je Uint8Array (256 bytes) -> převedeme na 64 Uint32 prvků
-					const data32 = new Uint32Array(dataPayload.buffer);				
-					outD = [
-						0x0000BF31 + ((mask >> 8) << 16), // Command + Register + (Address >> 4)
-						...Array.from(data32), // Celý payload v uint32
-						0           // Místo pro výsledné CRC na konci
-					];
-					silenceUntil.current = Date.now() + 2000;
-					break;
-				
-				case 0xFF: // Firmware Data - info
-					outD = [0x0000FF36, 0];
-					break;
+					// 4. Odeslání a návrat odpovědi
+					const response = await serialRef.current.sendAndReceive(hexArray);
+					setLastResponse(response);
 
-				default: // Runtime Data
-					outD = [0x00000036, 0];
-					break;
-				}
-				let cnt = outD.length;
+					// Malá prodleva mezi příkazy, aby se Serial port "nadechl"
+					await new Promise(resolve => setTimeout(resolve, 30));			
 
-				// 2. Výpočet CRC z celého pole (vše kromě posledního prvku)
-				let crc = 0;
-				for (let d = 0; d < (cnt - 1); d++) {
-					crc ^= outD[d];
-				}
-				outD[cnt - 1] = crc; // Uložení CRC na konec pole
-
-				// 3. Rozházení 32-bit uintů do 8-bit hexArray (Little Endian)
-				let hexArray = [];
-				for (let d = 0; d < cnt; d++) {
-					let x = outD[d];
-					hexArray.push(x & 0xFF);
-					hexArray.push((x >> 8) & 0xFF);
-					hexArray.push((x >> 16) & 0xFF);
-					hexArray.push((x >> 24) & 0xFF);
-				}
-
-				// 4. Odeslání a návrat odpovědi
-				const response = await serialRef.current.sendAndReceive(hexArray);
-				setLastResponse(response);
-
-				// Malá prodleva mezi příkazy, aby se Serial port "nadechl"
-				await new Promise(resolve => setTimeout(resolve, 30));			
-
-				return response;
-			} catch (err) {
-				console.error(`Queued Command ${label} failed:`, err);
-			} finally {
-				isProcessing.current = false;
-				queueLength.current--;
-			}	
-		});
+					return response;
+				} catch (err) {
+					console.error(`Queued Command ${label} failed:`, err);
+				} finally {
+					isProcessing.current = false;
+					queueLength.current--;
+				}	
+			});
+		commandQueue.current = currentPromise;
+		return currentPromise;
 	};
 
 	useEffect(() => {

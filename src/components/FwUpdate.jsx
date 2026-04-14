@@ -20,7 +20,6 @@ const FirmwareUpdate = ({ blInfo, productInfo, onCommand }) => {
 
 	useEffect(() => {
 		setCanFlash((status === 'Ready') && (blInfo.sts & 1));
-		console.log('Status: '+status, '- Running in bootloader = '+(blInfo.sts & 1));
 	}, [status, blInfo])
 	
     const formatVersion = (ver) => (!ver || ver === 0) ? '--' : ver.toString();

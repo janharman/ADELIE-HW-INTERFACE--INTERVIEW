@@ -274,7 +274,6 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 			case 14:	// ----------------------------- Terminating Resistor - Port #3
 				if ((prevStep.current === currentStep) && (terminatingResTimer.current)) return;
 				if (terminatingResTimer.current) clearInterval(terminatingResTimer.current);
-				prevStep.current = currentStep;
 				const runTermRes = () => {
 					setTermRes((prev) => {
 						const tr = (prev === 0)?(1 << (currentStep - 12)): 0;
@@ -300,7 +299,12 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 				if ((rtd.PD_ALL_OK & 0x0005) === 0x005)
 					setTimeout(() => setCurrentStep(prev => (prev === 17 ? 18 : prev)), 1200);
 				break;
+			case 20:	// ----------------------------- LEDs OK WARNING ERROR test
+				if (prevStep.current === currentStep) return;
+				onCommand('LEDs OK, WARNING and ERROR test', 0x52, 0x2000000);
+				break;
 		}
+		prevStep.current = currentStep;
     }, [currentStep, runtimeData, isConnected]);
 
     const handleNext = () => {
