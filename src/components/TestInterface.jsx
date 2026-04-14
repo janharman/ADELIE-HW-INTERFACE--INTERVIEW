@@ -217,8 +217,8 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 				// Definujeme funkci pro jeden krok
 				const runNextRelay = () => {
 					setRelayIndex((prev) => {
-						const next = (prev + 1) % 4;
-						const masks = [0x0001, 0x0002, 0x0004, 0x0008];
+						const next = (prev + 1) % 8;
+						const masks = [0x0001, 0, 0x0002, 0, 0x0004, 0, 0x0008, 0];
 						onCommand(`Relay ${next + 1}`, 0x52, masks[next], [(~masks[next]) & 0x000F]);
 						return next;
 					});
@@ -360,7 +360,7 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
                                 {isActive && step.id === 4 && (
                                     <div className="relay-visual">
                                         {[0, 1, 2, 3].map(i => (
-                                            <div key={i} className={`relay-box ${relayIndex === i ? 'on' : ''}`}>
+                                            <div key={i} className={`relay-box ${relayIndex === i*2 ? 'on' : ''}`}>
                                                 RE{i+1}
                                             </div>
                                         ))}
