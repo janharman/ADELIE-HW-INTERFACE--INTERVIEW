@@ -14,6 +14,9 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
     const relayTimer = useRef(null);
 	const terminatingResTimer = useRef(null);
 	const [termRes, setTermRes] = useState(0);
+	const commandDelay = useRef(0);
+	const [serialNumber, setSerialNumber] = useState('');
+	const [comment, setComment] = useState('');
 	const [rtd, setRtd] = useState({
 		Pwr24V: 0,
 		Pwr5V: 0,
@@ -28,6 +31,12 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 		CurHiB1: 0,
 		CurHiB2: 0,
 		CurHiB3: 0,
+		FanRotation: 0,
+		PowerOK: 0,
+		PD_5V: 0,
+		PD_12V: 0,
+		PD_19V: 0,
+		PD_ALL_OK: 0,
 	});
 
     // Test sequence definition
@@ -45,6 +54,17 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 		{ id: 11, label: 'Modbus Communication Port #2', type: 'manual' },
 		{ id: 12, label: 'Modbus Communication Port #3', type: 'manual' },
 		{ id: 13, label: 'Terminating Resistor Port #1', type: 'manual' },
+		{ id: 14, label: 'Terminating Resistor Port #2', type: 'manual' },
+		{ id: 15, label: 'Terminating Resistor Port #3', type: 'manual' },
+		{ id: 16, label: 'Fan Rotation #1 + #2', type: 'auto' },
+		{ id: 17, label: 'Power OK #1 + #2', type: 'auto' },
+		{ id: 18, label: 'PD Port', type: 'auto' },
+		{ id: 19, label: 'Visual: Display + Button', type: 'manual' },
+		{ id: 20, label: 'Visual: Data LEDs + 24VDC LEDs', type: 'manual' },
+		{ id: 21, label: 'Visual: ERROR + WARNING + OK LEDs', type: 'manual' },
+		{ id: 22, label: 'Serial Number', type: 'manual' },
+		{ id: 23, label: 'Comment', type: 'manual' },
+		{ id: 24, label: 'Save Report to Database', type: 'manual' },
     ];
 
     const turnOffAll = () => {
@@ -54,6 +74,7 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 
 	// DEBUG: Jump to step
     const jumpToStep = (index) => {
+		commandDelay.current = 0;
         turnOffAll();
         setCurrentStep(index);
     };
@@ -96,6 +117,27 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 				updated.VoltOnB3 = (d[56] + (d[57] << 8)) / 1000;
 				updated.CurHiB3 = d[24] + (d[25] << 8);
 			}
+			if (currentStep === 15) {
+				updated.FanRotation |= (d[72] + (d[73] << 8)) & 0xD00;
+			}
+			if (currentStep === 16) {
+				updated.PowerOK |= updated.statusOk & 0x3000000;
+			}
+			if (currentStep === 17) {
+				const volt = (d[30] + (d[31] << 8)) / 1000;
+				if ((volt > 4.5) && (volt < 5.5)) {				// PD for 5V
+					updated.PD_5V = volt;
+					updated.PD_ALL_OK |= 1;
+				}
+				if ((volt > 11) && (volt < 13)) {				// PD for 12V
+					updated.PD_12V = volt;
+					updated.PD_ALL_OK |= 2;
+				}
+				if ((volt > 18) && (volt < 20)) {				// PD for 19V
+					updated.PD_19V = volt;
+					updated.PD_ALL_OK |= 4;
+				}
+			}
 
 			return updated;
 		});
@@ -115,7 +157,7 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 			clearInterval(semaphoreTimer.current);
 			semaphoreTimer.current = null;
 		}
-		if ((currentStep < 12) && (currentStep > 14) && terminatingResTimer.current)
+		if (((currentStep < 12) || (currentStep > 14)) && terminatingResTimer.current)
 		{
 			clearInterval(terminatingResTimer.current);
 			terminatingResTimer.current = null;
@@ -187,21 +229,33 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 				}
 				break;
 			case 6:		// ----------------------------- High-Current Measurement - Branch #1
+				if (commandDelay.current) {	commandDelay.current--;	break; }
+				commandDelay.current = 5;
 				onCommand('Branch #1', 0x52, 0x100, [0x600]);
 				break;
 			case 7:		// ----------------------------- High-Current Measurement - Branch #2
+				if (commandDelay.current) {	commandDelay.current--;	break; }
+				commandDelay.current = 5;
 				onCommand('Branch #2', 0x52, 0x200, [0x500]);
 				break;
 			case 8:		// ----------------------------- High-Current Measurement - Branch #3
+				if (commandDelay.current) {	commandDelay.current--;	break; }
+				commandDelay.current = 5;
 				onCommand('Branch #3', 0x52, 0x400, [0x300]);
 				break;
 			case 9:		// ----------------------------- Modbus Communication - Port #1
+				if (commandDelay.current) {	commandDelay.current--;	break; }
+				commandDelay.current = 5;
 				onCommand('Branch #1', 0x52, 0x100, [0x600]);
 				break;
 			case 10:	// ----------------------------- Modbus Communication - Port #2
+				if (commandDelay.current) {	commandDelay.current--;	break; }
+				commandDelay.current = 5;
 				onCommand('Branch #2', 0x52, 0x200, [0x500]);
 				break;
 			case 11:	// ----------------------------- Modbus Communication - Port #3
+				if (commandDelay.current) {	commandDelay.current--;	break; }
+				commandDelay.current = 5;
 				onCommand('Branch #3', 0x52, 0x400, [0x300]);
 				break;
 			case 12:	// ----------------------------- Terminating Resistor - Port #1
@@ -210,13 +264,28 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 				if (terminatingResTimer.current) return;
 				const runTermRes = () => {
 					setTermRes((prev) => {
-						const tr = (!prev)?(1 << (currentStep - 12)): 0;
-						onCommand(`Terminating Resistor Port #1 - ${tr?'ON':'OFF'}`, 0x53, tr);
+						const tr = (prev === 0)?(1 << (currentStep - 12)): 0;
+						onCommand(`Terminating Resistor Port #${currentStep - 11} - ${tr?'ON':'OFF'}`, 0x53, tr);
 						return tr;
 					});
 				};
 				runTermRes();
 				terminatingResTimer.current = setInterval(runTermRes, 2000);				
+				break;
+			case 15:	// ----------------------------- Fan Rotation #1 + #2
+				if ((rtd.FanRotation & 0xD00) === 0xD00)
+					setTimeout(() => setCurrentStep(prev => (prev === 15 ? 16 : prev)), 1200);
+				if (commandDelay.current) {	commandDelay.current--;	break; }
+				commandDelay.current = 6;
+				onCommand('FAN TEST', 0x52, 0x1000000);
+				break;
+			case 16:	// ----------------------------- Power OK #1 + #2
+				if ((rtd.PowerOK & 0x3000000) === 0x3000000)
+					setTimeout(() => setCurrentStep(prev => (prev === 16 ? 17 : prev)), 1200);
+				break;
+			case 17:	// ----------------------------- PD Port 5 12 19 V
+				if ((rtd.PD_ALL_OK & 0x0003) === 0x003)
+					setTimeout(() => setCurrentStep(prev => (prev === 17 ? 18 : prev)), 1200);
 				break;
 		}
     }, [currentStep, runtimeData, isConnected]);
@@ -323,12 +392,67 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
                                     </div>
                                 )}
 
-								{/* Step 13: Terminating Resistor - Port #1 */}
-                                {step.id === 13 && (
+								{/* Step 13, 14, 15: Terminating Resistor - Port #1 */}
+                                {(step.id === 13 || step.id === 14 || step.id === 15) && isActive && (
                                     <div className="voltage-visual">
-                                        <div className={`led-light ${termRes & 1 ? 'on' : ''}`}></div>
+                                        <div className={`led-light aqua ${termRes & 1 ? 'on' : ''}`}>{termRes ? 'ON' : 'OFF'}</div>
                                     </div>
                                 )}
+
+								{/* Step 16: Fan Rotation #1 + #2 */}
+                                {(step.id === 16) && isActive && (
+                                    <div className="voltage-visual">
+                                        <div className={`led-light aqua ${(rtd.FanRotation & 0x100) ? 'on' : ''}`}>{(rtd.FanRotation & 0x100) ? 'ON' : 'OFF'}</div>
+                                        <div className={`led-light green ${(rtd.FanRotation & 0x400) ? 'on' : ''}`}>{(rtd.FanRotation & 0x400) ? 'ON' : 'OFF'}</div>
+                                        <div className={`led-light green ${(rtd.FanRotation & 0x800) ? 'on' : ''}`}>{(rtd.FanRotation & 0x800) ? 'ON' : 'OFF'}</div>
+                                    </div>
+                                )}
+
+								{/* Step 17: Power OK #1 + #2 */}
+                                {(step.id === 17) && isActive && (
+                                    <div className="voltage-visual">
+                                        <div className={`led-light green ${(rtd.PowerOK & 0x1000000) ? 'on' : ''}`}>{(rtd.PowerOK & 0x1000000) ? 'ON' : 'OFF'}</div>
+                                        <div className={`led-light green ${(rtd.PowerOK & 0x2000000) ? 'on' : ''}`}>{(rtd.PowerOK & 0x2000000) ? 'ON' : 'OFF'}</div>
+                                    </div>
+                                )}
+
+								{/* Step 18: Power Delivery Port values 5 12 19 V */}
+                                {step.id === 18 && (
+                                    <div className="voltage-visual">
+                                        <div><span>5V</span><span className={`v-tag ${(rtd.PD_ALL_OK & 1) ? 'ok' : 'fail'}`}>{rtd.PD_5V} V</span></div>
+                                        <div><span>12V</span><span className={`v-tag ${(rtd.PD_ALL_OK & 2) ? 'ok' : 'fail'}`}>{rtd.PD_12V} V</span></div>
+                                        <div><span>19V</span><span className={`v-tag ${(rtd.PD_ALL_OK & 4) ? 'ok' : 'fail'}`}>{rtd.PD_19V} V</span></div>
+                                    </div>
+                                )}
+
+								{/* Step 22: Serial Number */}
+                                {step.id === 22 && (
+									<div className="voltage-visual">
+										<div>
+											{serialNumber && <span className="serial-preview">S/N: {serialNumber}</span>}
+											<input type="number" className="serial-input"	placeholder="Enter S/N"	value={serialNumber}
+												onChange={(e) => setSerialNumber(e.target.value)}
+												onKeyDown={(e) => {
+													if (e.key === 'Enter' && serialNumber.length > 0) {
+														handleNext(); // Potvrzení Enterem
+													}
+												}}
+											/>
+										</div>
+									</div>
+								)}
+
+								{/* Step 23: Serial Number */}
+                                {step.id === 23 && (
+									<div className="voltage-visual">
+										<input type="text" className="serial-input"	placeholder="Enter comment"	value={comment}
+											onChange={(e) => setComment(e.target.value)}
+											onKeyDown={(e) => {
+												if (e.key === 'Enter') handleNext();
+											}}
+										/>
+									</div>
+								)}
                             </div>
 
                             <div className="step-action-col">
