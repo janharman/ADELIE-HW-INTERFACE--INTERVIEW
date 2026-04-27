@@ -2,20 +2,21 @@ import React, { useMemo } from 'react';
 import './FwFlashing.css';
 
 const FwFlashing = ({ buffer, progress, status }) => {
-    const CHUNK_SIZE = 256; // 1 kB
-    const MAX_ADDRESS = 128 * 1024; // Limit na první polovinu FLASH (128 kB)
-    const TOTAL_CHUNKS = MAX_ADDRESS / CHUNK_SIZE; // Max 128 čtverečků
+    const CHUNK_SIZE = 256; // 256 Bytes
+    const MIN_ADDRESS = 128 * 1024; // Start @ 2nd half of FLASH (128 kB)
+    const MAX_ADDRESS = 256 * 1024;
+    const TOTAL_CHUNKS = (MAX_ADDRESS - MIN_ADDRESS) / CHUNK_SIZE;
 
     // Vyfiltrujeme pouze obsazené bloky v první polovině paměti
     const activeChunks = useMemo(() => {
         const active = [];
         for (let i = 0; i < TOTAL_CHUNKS; i++) {
-            const start = i * CHUNK_SIZE;
+            const address = i * CHUNK_SIZE + MIN_ADDRESS;
             let hasData = false;
             
             // Kontrola, zda 1kB blok obsahuje jiná data než 0xFF
             for (let j = 0; j < CHUNK_SIZE; j++) {
-                if (buffer[start + j] !== 0xFF) {
+                if (buffer[address + j] !== 0xFF) {
                     hasData = true;
                     break;
                 }
@@ -24,7 +25,7 @@ const FwFlashing = ({ buffer, progress, status }) => {
             if (hasData) {
                 active.push({
                     idx: i,
-                    addr: start
+                    addr: address
                 });
             }
         }
@@ -44,7 +45,7 @@ const FwFlashing = ({ buffer, progress, status }) => {
                     FLASHING: <strong>{percent}%</strong>
                 </div>
                 <div className="flashing-details">
-                    {completedCount} / {activeChunks.length} blocks (1 kB per block)
+                    {completedCount} / {activeChunks.length} blocks (256 Bytes per block)
                 </div>
             </div>
 

@@ -18,6 +18,7 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 	const [serialNumber, setSerialNumber] = useState('');
 	const [comment, setComment] = useState('');
 	const prevStep = useRef(-1);
+	const switchNext = useRef(0);
 	const [rtd, setRtd] = useState({
 		Pwr24V: 0,
 		Pwr5V: 0,
@@ -82,6 +83,21 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
         setCurrentStep(index);
     };
 
+	// High-current switch to next
+	const highCurrentSwitch = (curr, next) => {
+		if (curr > 3000) {
+			if (switchNext.current === 0) {
+				switchNext.current = Date.now() + 3000;
+			} 
+			else if (Date.now() > switchNext.current) {
+				switchNext.current = 0; // Vynulovat pro další kroky
+				setCurrentStep(next);
+			}
+		} else {
+			switchNext.current = 0;
+		}
+	}
+
     useEffect(() => {
 		if (!(runtimeData && runtimeData.length >= 30)) return;
 		let d = runtimeData;
@@ -111,14 +127,17 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 			if (currentStep === 6) {
 				updated.VoltOnB1 = (d[48] + (d[49] << 8)) / 1000;
 				updated.CurHiB1 = d[16] + (d[17] << 8);
+				highCurrentSwitch(updated.CurHiB1, 7);
 			}
 			if (currentStep === 7) {
 				updated.VoltOnB2 = (d[52] + (d[53] << 8)) / 1000;
 				updated.CurHiB2 = d[20] + (d[21] << 8);
+				highCurrentSwitch(updated.CurHiB2, 8);
 			}
 			if (currentStep === 8) {
 				updated.VoltOnB3 = (d[56] + (d[57] << 8)) / 1000;
 				updated.CurHiB3 = d[24] + (d[25] << 8);
+				highCurrentSwitch(updated.CurHiB3, 9);
 			}
 			if (currentStep === 15) {
 				updated.FanRotation |= (d[72] + (d[73] << 8)) & 0xD00;
@@ -213,12 +232,10 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 				break;
 			case 3: 	// ----------------------------- Relay Cycling
 				if (relayTimer.current) return;
-				console.log("Starting new Relay Timer");						
-				// Definujeme funkci pro jeden krok
 				const runNextRelay = () => {
 					setRelayIndex((prev) => {
 						const next = (prev + 1) % 8;
-						const masks = [0x0001, 0, 0x0002, 0, 0x0004, 0, 0x0008, 0];
+						const masks = [0x0101, 0x100, 0x0102, 0x100, 0x0104, 0x100, 0x0108, 0x100];
 						onCommand(`Relay ${next + 1}`, 0x52, masks[next], [(~masks[next]) & 0x000F]);
 						return next;
 					});

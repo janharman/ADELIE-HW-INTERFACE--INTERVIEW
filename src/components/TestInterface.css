@@ -133,22 +133,23 @@
 /* Relay Styles */
 .relay-visual {
     display: flex;
-    gap: 6px;
+    gap: 16px;
     margin-left: 20px;
 }
 
 .relay-box {
-    padding: 2px 6px;
-    border: 1px solid #444;
+    padding: 4px 10px;
+    border: 1px solid #555;
     background: #222;
-    color: #555;
-    font-size: 9px;
+    color: #777;
+    font-size: 14px;
     font-weight: bold;
-    border-radius: 2px;
+	text-align: center;
+	min-width: 39px;
 }
 
 .relay-box.on {
-    background: #d35400;
+    background: #e32200;
     color: white;
     border-color: #e67e22;
     box-shadow: 0 0 8px #d35400;

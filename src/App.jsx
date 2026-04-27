@@ -20,7 +20,7 @@ function App() {
 	const [activeTab, setActiveTab] = useState('Runtime Data');
 	const [statusON, setStatusON] = useState(0);
 	const [runtimeData, setRuntimeData] = useState([]);
-	const [productInfo, setProductInfo] = useState({recver: 0, fw: 0, hw: 0, bl: 0,	info: '---'});
+	const [productInfo, setProductInfo] = useState({recver: 0, snr: 0, fw: 0, hw: 0, bl: 0,	info: '---'});
 	const [isConnected, setIsConnected] = useState(true);
 	const [bootloaderInfo, setBootloaderInfo] = useState({ver: 0, date: 0, sts: 0});
 	const silenceUntil = useRef(0);
@@ -115,9 +115,10 @@ function App() {
 						const view = new DataView(buffer);
 				        let di = text.indexOf('Date:');
 						let pinf = {
-							recver: view.getUint32(4, true),
+							recver: view.getUint32(4, true) & 0xFF,
+							snr: view.getUint32(4, true) >> 8,
 							fw: view.getUint32(8, true).toString().toUpperCase(),
-							hw: view.getUint32(12, true).toString(16).toUpperCase(),
+							hw: 'H'+view.getUint32(12, true).toString(16).toUpperCase().padStart(3, '0'),
 							bl: view.getUint32(16, true),
 				            date: di > -1 ? text.slice(di + 6, di + 12) : '--',
 							info: text.split('\0')[0].replaceAll("\\n", "\n")
@@ -316,6 +317,20 @@ function App() {
 							) : (
 								<div className="no-data-msg">--- NO DATA RECEIVED ---</div>
 							)}
+						</div>
+					</section>
+
+					<section className="panel-section">
+						<h2 className="section-title">Hardware</h2>
+						<div className='hardware-info'>
+							<div>
+								<span className="control-label">VERSION:</span>
+								<span className='hardware-info-ver'>{productInfo.hw}</span>
+							</div>
+							<div>
+								<span className="control-label">SNR:</span>
+								<span className='hardware-info-ver'>{productInfo.snr}</span>
+							</div>
 						</div>
 					</section>
 

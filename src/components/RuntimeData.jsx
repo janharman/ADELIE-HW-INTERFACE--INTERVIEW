@@ -34,6 +34,7 @@ function RuntimeData({ data, pinf }) {
 		{ gap: 1, msk: 0x400, txt: 'Branch Current #3 OK', cls: 'sts-led-yellow' },
 		{ gap: 0, msk: 0x10000, txt: 'On Board PSU 24 VDC OK', cls: 'sts-led-blue' },
 		{ gap: 0, msk: 0x20000, txt: 'On Board PSU 5 VDC OK', cls: 'sts-led-blue' },
+		{ gap: 0, msk: 0x40000, txt: 'On Board PSU 19 VDC OK', cls: 'sts-led-blue' },
 		{ gap: 0, msk: 0x1000000, txt: 'Power OK #1', cls: 'sts-led-orange' },
 		{ gap: 0, msk: 0x2000000, txt: 'Power OK #2', cls: 'sts-led-orange' },
 		{ gap: 0, msk: 0x10000000, txt: 'PC Communication OK', cls: 'sts-led-yellow' }

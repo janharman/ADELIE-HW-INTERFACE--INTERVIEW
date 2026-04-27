@@ -115,6 +115,27 @@ body {
 	margin-bottom: 0;
 }
 
+.hardware-info {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	.control-label{
+		font-size: 12px;
+	}
+}
+
+.hardware-info-ver {
+	font-size: 28px;
+	font-weight: 700;
+	color: rgb(245, 255, 58);
+	background-color: black;
+	margin-left: 3px;
+	border: 1px solid #555;
+	border-radius: 5px;
+	padding: 0 10px;
+	letter-spacing: 2px;
+}
+
 /* --- DATA MONITOR (HEX) --- */
 .data-len-tag {
 	background-color: #333;

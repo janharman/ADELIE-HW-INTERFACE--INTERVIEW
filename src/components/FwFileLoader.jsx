@@ -4,9 +4,9 @@ const FwFileLoader = ({ buffer, onParsed, onStatus }) => {
     const [fileName, setFileName] = useState('');
     const fileInputRef = useRef(null);
 
-    const FW_ADR_ADDRESSES = 0x1E000;
-    const FW_ADR_FW_INFO = 0x1E200;
-    const FW_ADR_CRC = 0x1F000;
+    const FW_ADR_ADDRESSES = 0x3E000;
+    const FW_ADR_FW_INFO = 0x3E200;
+    const FW_ADR_CRC = 0x3F000;
     const PROGRAM_CRC_STS_ASSIGNED = 0x1CAC2ACA;
 
     const parseHex = (text) => {
@@ -46,10 +46,11 @@ const FwFileLoader = ({ buffer, onParsed, onStatus }) => {
         const view = new DataView(buffer.buffer);
         
         // CRC Výpočet
-        let addr = view.getUint32(FW_ADR_ADDRESSES, true);
-        let size = view.getUint32(FW_ADR_ADDRESSES + 4, true) >> 2;
+        let addr = view.getUint32(FW_ADR_ADDRESSES + 8, true);
+        let size = view.getUint32(FW_ADR_ADDRESSES + 16, true) >> 2;
+		console.log(addr.toString(16), size);
         let crc = 0;
-        if (addr === 0 && size < (buffer.length / 4)) {
+        if (addr === 0x20000 && size < (buffer.length / 4)) {
             while (size--) {
                 crc ^= view.getUint32(addr, true);
                 addr += 4;

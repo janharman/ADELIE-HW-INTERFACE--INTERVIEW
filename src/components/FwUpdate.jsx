@@ -34,16 +34,19 @@ const FirmwareUpdate = ({ blInfo, productInfo, onCommand }) => {
 		
 		setStatus('Flashing');
 		const CHUNK_SIZE = 256;
-		const MAX_ADDRESS = 128 * 1024;
+		const MIN_ADDRESS = 128 * 1024;
+		const MAX_ADDRESS = 256 * 1024;
+		const NUM_OF_CHUCKS = (MAX_ADDRESS - MIN_ADDRESS) / CHUNK_SIZE;
 		const buffer = firmwareBuffer.current;
 
 		// 1. Identifikace aktivních bloků (stejná logika jako v FwFlashing)
+		// Only for FLASHable region
 		const activeChunks = [];
-		for (let i = 0; i < MAX_ADDRESS / CHUNK_SIZE; i++) {
-			const start = i * CHUNK_SIZE;
+		for (let i = 0; i < NUM_OF_CHUCKS; i++) {
+			const address = MIN_ADDRESS + i * CHUNK_SIZE;
 			let hasData = false;
 			for (let j = 0; j < CHUNK_SIZE; j++) {
-				if (buffer[start + j] !== 0xFF) { hasData = true; break; }
+				if (buffer[address + j] !== 0xFF) { hasData = true; break; }
 			}
 			if (hasData) activeChunks.push(i);
 		}
@@ -58,7 +61,7 @@ const FirmwareUpdate = ({ blInfo, productInfo, onCommand }) => {
 		for (const chunkIdx of activeChunks) {
 			setFlashProgress(prev => ({ ...prev, currentIdx: chunkIdx }));
 			
-			const startAddr = chunkIdx * CHUNK_SIZE;
+			const startAddr = chunkIdx * CHUNK_SIZE + MIN_ADDRESS;
 			const dataChunk = buffer.slice(startAddr, startAddr + CHUNK_SIZE);
 			let numOfTries = 0;
 			while (numOfTries < 5)

@@ -2,14 +2,14 @@ import React from 'react';
 import './FwFlashMap.css';
 
 export const FLASH_MEMORY_LAYOUT = [
-    { strt: 0x00000, size: 0x1E000, type: 0, label: 'FW' },
-    { strt: 0x1E000, size: 0x01000, type: 0, label: 'FW-Info' },
-    { strt: 0x1F000, size: 0x01000, type: 0, label: 'FW-CRC' },
-    { strt: 0x20000, size: 0x01000, type: 1, label: 'Setup' },
-    { strt: 0x22000, size: 0x01000, type: 1, label: 'Cal-Data' },
-    { strt: 0x23000, size: 0x01000, type: 1, label: 'Dev ID' },
-    { strt: 0x30000, size: 0x08000, type: 2, label: 'BOOTLOADER' },
-    { strt: 0x38000, size: 0x01000, type: 2, label: 'BOOT-FIX' },
+    { strt: 0x00000, size: 0x08000, type: 2, label: 'BOOTLOADER' },
+    { strt: 0x08000, size: 0x01000, type: 2, label: 'BOOT-FIX' },
+    { strt: 0x1C000, size: 0x01000, type: 1, label: 'Setup' },
+    { strt: 0x1E000, size: 0x01000, type: 1, label: 'Cal-Data' },
+    { strt: 0x1F000, size: 0x01000, type: 1, label: 'Dev ID' },
+    { strt: 0x20000, size: 0x1E000, type: 0, label: 'FW' },
+    { strt: 0x3E000, size: 0x01000, type: 0, label: 'FW-Info' },
+    { strt: 0x3F000, size: 0x01000, type: 0, label: 'FW-CRC' },
 ];
 
 const FwFlashMap = ({ buffer }) => {
