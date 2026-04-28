@@ -1,6 +1,6 @@
 # Adélie Interface - Diagnostic Tool 🚀
 
-Tento nástroj slouží pro oživování, testování a update firmware hardware **greenBOX (Adélie)**.
+Tento nástroj slouží pro oživování, testování a update firmware hardware **greenBOX (Adélie) Interface**.
 Projekt byl migrován z CRA na **Vite** pro vyšší rychlost a stabilitu.
 
 ## 🛠️ Vývojové příkazy
@@ -8,12 +8,12 @@ Projekt byl migrován z CRA na **Vite** pro vyšší rychlost a stabilitu.
 V kořenovém adresáři projektu můžeš spouštět:
 
 ### `npm run dev`
-Spustí aplikaci ve vývojovém režimu na [http://localhost:5173](http://localhost:5173).  
+Spustí aplikaci ve vývojovém režimu na [http://localhost:3000/Adelie-interface-test/).  
 Stránka se automaticky obnoví při uložení změn v kódu.
 
 ### `npm run build`
-Zkompiluje aplikaci pro produkční použití do složky `dist` (výchozí).  
-Výsledkem je optimalizovaný balíček připravený k nahrání na webový server.
+Zkompiluje aplikaci pro produkční použití do složky `dist` (výchozí).
+Výsledkem je optimalizovaný balíček připravený k upload na webový server.
 
 ---
 

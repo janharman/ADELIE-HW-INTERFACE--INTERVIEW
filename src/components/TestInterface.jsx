@@ -299,7 +299,7 @@ function TestInterface({ isConnected, onCommand, runtimeData }) {
 					});
 				};
 				runTermRes();
-				terminatingResTimer.current = setInterval(runTermRes, 2000);				
+				terminatingResTimer.current = setInterval(runTermRes, 2500);				
 				break;
 			case 15:	// ----------------------------- Fan Rotation #1 + #2
 				if ((rtd.FanRotation & 0xD00) === 0xD00)

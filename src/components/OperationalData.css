@@ -1,0 +1,257 @@
+/* Main container for the Operational Data tab */
+.operational-container {
+    padding: 20px;
+    color: #e0e0e0;
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Vertical stack layout for configuration cards */
+.op-vertical-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Individual configuration card style */
+.op-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    width: 100%; /* Ensures cards take full width of the vertical layout */
+}
+
+/* Card header with underline */
+.op-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #00d4ff;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    padding-bottom: 8px;
+}
+
+/* Generic row for label-input pairs */
+.op-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.op-row label { 
+    font-size: 0.9rem; 
+    color: #aaa; 
+}
+
+/* Specific styling for branch protection rows (Limit + Timeout on one line) */
+.op-branch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.branch-label {
+    font-weight: bold;
+    width: 100px;
+    color: #00d4ff;
+}
+
+/* Standardized input and select styling */
+.op-row input, .input-group input, .op-row select {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    width: 80px;
+    text-align: center;
+	font-size: 1.0rem;
+	font-weight: bold;
+}
+
+/* Wrapper for input + unit label (e.g., "mA") */
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.unit {
+    color: #666;
+    font-size: 0.8rem;
+    width: 30px;
+}
+
+/* --- No PC Communication Section --- */
+
+/* Grid for behavior bit toggles (Watchdog) */
+.behaviour-bits-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columns for better fit in full-width card */
+    gap: 6px;
+    margin-top: 15px;
+}
+
+/* Individual bit toggle button */
+.bit-btn {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #877;
+    font-size: 0.9rem; /* Normalized font size */
+    padding: 8px 2px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bit-btn.active {
+    background: #442200; /* Dark orange/brown for warning state */
+    border-color: #ff8800;
+    color: #ff8800;
+}
+
+/* --- Terminating Resistors Section --- */
+
+.termination-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dotted #444;
+}
+
+.resistor-label {
+    font-size: 0.85rem;
+    color: #aaa;
+    margin-bottom: 8px;
+}
+
+.resistor-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    max-width: 400px;
+}
+
+/* Resistor toggle button */
+.res-btn {
+    padding: 10px;
+    background: #222;
+    border: 1px solid #444;
+    color: #888;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.res-btn.active {
+    background: #004455; /* Cyan-ish theme for active communication parts */
+    border-color: #00d4ff;
+    color: #00d4ff;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+}
+
+/* --- Footer Action Buttons --- */
+
+.op-save-container {
+    display: flex;
+    justify-content: center;
+    padding: 30px 0 10px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 10px;
+}
+
+/* Read button (Secondary action) */
+.read-btn {
+    background: #444;
+    color: white;
+    border: 1px solid #666;
+    padding: 12px 30px;
+    margin-right: 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.read-btn:hover { 
+    background: #555; 
+    border-color: #888; 
+}
+
+/* Write button (Primary action) */
+.save-all-btn {
+    background: linear-gradient(135deg, #006600 0%, #004400 100%);
+    color: white;
+    border: 1px solid #00aa00;
+    padding: 14px 40px;
+    font-weight: bold;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.save-all-btn:hover {
+    background: linear-gradient(135deg, #008800 0%, #005500 100%);
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+.save-all-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Layout for the fan trigger row to accommodate actual temp */
+.fan-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.fan-input-side {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Styled display for actual hardware temperature */
+.actual-temp-display {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    border-left: 2px solid #444;
+    padding-left: 20px;
+}
+
+.actual-label {
+    font-size: 0.7rem;
+    color: #888;
+    letter-spacing: 1px;
+}
+
+.actual-value {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #ff8800; /* Orange color to stand out */
+    font-family: 'Courier New', monospace; /* Digital look */
+}
+
+/* Range hint under the input */
+.range-hint {
+    font-size: 0.7rem;
+    color: #555;
+    display: block;
+}

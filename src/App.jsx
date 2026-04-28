@@ -97,6 +97,27 @@ function App() {
 						setStatusON(lastResponse[8] + (lastResponse[9] << 8) + (lastResponse[10] << 16) + (lastResponse[11] << 24));
 						setRuntimeData(lastResponse);
 						break;
+					case 0x53: // ODPOVĚĎ NA OPERATIONAL DATA
+						console.log("Operational data received from HW");
+						// Vezmeme surová data (od 4. bajtu dál jsou uint32 slova)
+						const buffod = new Uint8Array(lastResponse).buffer;
+						const viewod = new DataView(buffod);
+						const opPayload = [];
+						
+						// Začínáme na 4. bytu (přeskočíme hlavičku)
+						// Jdeme po 4 bytech, celkem 6x (tedy do 24. bytu dat)
+						for (let i = 0; i < 6; i++) {
+							opPayload.push(viewod.getUint32(4 + (i * 4), true));
+						}
+						
+						// Uložíme to do stavu tak, aby to komponenta poznala
+						setRuntimeData({
+							...lastResponse, // zachováme pole pro zobrazení HEX
+							isOperationalResponse: true,
+							operationalPayload: opPayload,
+							timestamp: Date.now() // pro vynucení useEffectu v komponentě
+						});
+						break;
 					case 0xB1: // Bootloader Info
 						const bli = {
 							ver: lastResponse[4], 
@@ -170,9 +191,21 @@ function App() {
 							outD[2] = dataPayload[0];
 						}
 						break;
+
 					case 0x53:	// Operational Data
-						outD = [0x01055331, mask, 0];
-						break;
+						if (dataPayload === 'READ') {
+							// Hlavička: 0x36 (čtení), 0x53 (reg), 0x00 (od), 0x00 (všechny)
+							outD = [0x00005336, 0]; // 0 je místo pro CRC
+						} else {
+							const payload = dataPayload || [];
+							outD = [
+								0x06005331, // Zápis 6 slov
+								...(Array.from({ length: 6 }, (_, i) => payload[i] || 0)),
+								0           // CRC
+							];
+						}
+						break;	
+
 					case 0xB0:	// Reset / Bootloader
 						outD = [0x0100B031, mask, 0]; // 3. prvek je místo pro CRC
 						break;
@@ -357,7 +390,7 @@ function App() {
 						{activeTab === 'Runtime Data' && <RuntimeData data={runtimeData} pinf={productInfo} />}
 						{activeTab === 'Firmware Update' && <FirmwareUpdate blInfo={bootloaderInfo} productInfo={productInfo} onCommand={handleManualCommand}/>}
 						{activeTab === 'Test Interface' && <TestInterface isConnected={isConnected} onCommand={handleManualCommand} runtimeData={runtimeData}/>}
-						{activeTab === 'Operational Data' && <OperationalData />}
+						{activeTab === 'Operational Data' && <OperationalData onCommand={handleManualCommand} runtimeData={runtimeData} productInfo={productInfo}/>}
 					</div>
 				</section>
 			</main>
