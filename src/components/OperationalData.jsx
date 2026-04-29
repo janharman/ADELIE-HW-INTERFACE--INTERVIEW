@@ -56,11 +56,13 @@ function OperationalData({ onCommand, runtimeData, productInfo }) {
                 if (noPcMsb & (1 << i)) activeBits.push(i);
             }
 
+			let fanT = (d[3] & 0xFFFF);
+			if (fanT > 60) fanT /= 10;	// probably older version <= 260417
             setConfig({
                 limitB1: b1.limit, timeoutB1: b1.timeout,
                 limitB2: b2.limit, timeoutB2: b2.timeout,
                 limitB3: b3.limit, timeoutB3: b3.timeout,
-                fanTemp: (d[3] & 0xFFFF) / 10.0, // UI shows decimal from HW tenths
+                fanTemp: fanT, // UI shows decimal from HW tenths
                 termRes: d[5] & 0x07
             });
 
@@ -95,7 +97,8 @@ function OperationalData({ onCommand, runtimeData, productInfo }) {
 
     // Display actual temperature from runtimeData (assuming .Temp exists)
     // If your temperature field is named differently, change it here:
-    const actualTemp = ((runtimeData[36] + (runtimeData[37] << 8))/10).toFixed(1);
+	const at = (runtimeData[36] + (runtimeData[37] << 8));
+	const actualTemp = isNaN(at)?'--.-': (at/10).toFixed(1);
 
     return (
         <div className="operational-container">

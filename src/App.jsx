@@ -396,7 +396,7 @@ function App() {
 			</main>
 
 			<footer className="app-footer">
-				greenBOX Interface v1.0 | Ecogate Inc. @{__BUILD_DATE__}
+				greenBOX Interface v1.0 | Ecogate Inc. @ {__BUILD_DATE__}
 			</footer>
 		</div>
 	);
