@@ -90,7 +90,7 @@ function OperationalData({ onCommand, runtimeData, productInfo }) {
             config.termRes & 0x07
         ];
 
-        onCommand('Save Operational Data', 0x53, 0, payload);
+        onCommand('Save Operational Data', 0x53, -1, payload);
     };
 
     const readFromHW = () => onCommand('Read Operational Data', 0x53, 0, 'READ');

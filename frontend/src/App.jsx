@@ -197,12 +197,18 @@ function App() {
 							// Hlavička: 0x36 (čtení), 0x53 (reg), 0x00 (od), 0x00 (všechny)
 							outD = [0x00005336, 0]; // 0 je místo pro CRC
 						} else {
-							const payload = dataPayload || [];
-							outD = [
-								0x06005331, // Zápis 6 slov
-								...(Array.from({ length: 6 }, (_, i) => payload[i] || 0)),
-								0           // CRC
-							];
+							if (dataPayload)	// This is for All Operational Data
+								outD = [
+									0x06005331, // Write 6 words
+									...(Array.from({ length: 6 }, (_, i) => payload[i] || 0)),
+									0           // CRC
+								];
+							else 	// only Terminating resistors
+								outD = [
+									0x01055331,
+									mask,
+									0			// CRC
+								];
 						}
 						break;	
 
